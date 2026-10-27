@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Staff log in | Medisync</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="login-page">
+    <header class="site-header">
+      <a href="index.html" class="brand">Medi<span>sync</span></a>
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-text">Back to home</a>
+      </div>
+    </header>
+
+    <main class="login-main">
+      <section
+        class="login-card-patient login-card-staff"
+        aria-labelledby="staff-login-title"
+      >
+        <nav class="login-tabs" aria-label="Choose account type">
+          <a href="patient-login.html">Patient</a>
+          <a href="staff-login.html" class="active" aria-current="page"
+            >Clinic staff</a
+          >
+        </nav>
+
+        <h1 id="staff-login-title">Staff log in</h1>
+        <p class="login-phrase">
+          Manage today's schedule, patient records, and walk-ins.
+        </p>
+
+        <div id="staffMessage" class="login-message" role="alert" hidden></div>
+
+        <form id="staffForm" class="login-form" novalidate>
+          <div class="login-field">
+            <label for="staffId">Staff ID or work email</label>
+            <input
+              type="text"
+              id="staffId"
+              name="staffId"
+              autocomplete="username"
+              required
+            />
+          </div>
+
+          <div class="login-field">
+            <label for="staffPassword">Password</label>
+            <input
+              type="password"
+              id="staffPassword"
+              name="password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <button type="submit" class="btn btn-solid btn-block">
+            Log in to staff portal
+          </button>
+        </form>
+
+        <p class="login-alternative">
+          Trouble signing in? Ask the clinic administrator to reset your
+          password.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
