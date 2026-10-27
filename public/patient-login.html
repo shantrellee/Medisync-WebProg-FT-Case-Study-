@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Patient log in | Medisync</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="login-page">
+    <header class="site-header">
+      <a href="index.html" class="brand">Medi<span>sync</span></a>
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-text">Back to home</a>
+      </div>
+    </header>
+
+    <main class="login-main">
+      <section class="login-card-patient" aria-labelledby="login-title">
+        <nav class="login-tabs" aria-label="Choose account type">
+          <a href="patient-login.html" class="active" aria-current="page"
+            >Patient</a
+          >
+          <a href="staff-login.html">Clinic staff</a>
+        </nav>
+
+        <h1 id="login-title">Welcome back</h1>
+        <p class="login-phrase">Log in to see and manage your appointments.</p>
+
+        <div id="loginMessage" class="login-message" role="alert" hidden></div>
+
+        <form id="loginForm" class="login-form" novalidate>
+          <div class="login-field">
+            <label for="loginEmail">Email address</label>
+            <input
+              type="email"
+              id="loginEmail"
+              name="email"
+              autocomplete="email"
+              required
+            />
+          </div>
+
+          <div class="login-field">
+            <label for="loginPassword">Password</label>
+            <input
+              type="password"
+              id="loginPassword"
+              name="password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <button type="submit" class="btn btn-solid btn-block">Log in</button>
+        </form>
+
+        <p class="login-alternative">
+          New to Medisync? <a href="register.html">Create an account</a>
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
