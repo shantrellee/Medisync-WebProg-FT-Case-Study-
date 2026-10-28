@@ -330,8 +330,6 @@ ul, ol { list-style: none; }
   letter-spacing: -0.02em;
 }
 .login-phrase { margin: 6px 0 24px; color: var(--muted); }
-
-/* Form */
 .login-form { display: flex; flex-direction: column; gap: 16px; }
 .login-field { display: flex; flex-direction: column; gap: 6px; }
 .login-field label { font-size: 0.875rem; font-weight: 600; }
@@ -346,7 +344,7 @@ ul, ol { list-style: none; }
 }
 .login-field input.invalid { border-color: #B91C1C; background: #FEF2F2; }
 
-/* Error / success message (script.js removes [hidden] and sets text) */
+
 .login-message {
   margin-bottom: 16px;
   padding: 10px 14px;
