@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Medisync | Clinic Patient and Appointment System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="patient.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="patient-home.html" class="brand">Medi<span>sync</span></a>
+      <nav class="nav" aria-label="Main">
+        <a href="#services">Services</a>
+        <a href="#how">How it works</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="header-actions">
+        <button
+          type="button"
+          class="user-btn"
+          id="userMenuBtn"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="userMenu"
+        >
+          <span class="avatar" id="userInitial">P</span>
+          <span class="user-name" id="userName">Patient</span>
+          <span class="chevron" aria-hidden="true"></span>
+        </button>
+
+        <ul class="user-menu" id="userMenu" hidden>
+          <li><a href="patient-pov-dashboard.html">Dashboard</a></li>
+          <li><a href="settings.html">Settings</a></li>
+          <li><button type="button" id="logoutBtn">Log out</button></li>
+        </ul>
+      </div>
+    </header>
+
+    <main>
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-copy">
+          <h1>Book your clinic visit in under a minute.</h1>
+          <p class="lead">
+            Medisync keeps your appointments, records, and reminders in one
+            place, so you spend less time in the waiting room and more time
+            getting care.
+          </p>
+
+          <div class="upcoming">
+            <h2>Your appointments</h2>
+            <ul>
+              <li>
+                <div>
+                  <strong>General check-up</strong>
+                  <span>Dr. Santos, Nov 4, 9:00 AM</span>
+                </div>
+                <span class="badge badge-pending">Pending</span>
+              </li>
+              <li>
+                <div>
+                  <strong>Laboratory tests</strong>
+                  <span>Dr. Reyes, Oct 20, 1:00 PM</span>
+                </div>
+                <span class="badge badge-done">Done</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <form
+          class="booking"
+          action="#"
+          method="post"
+          aria-labelledby="booking-title"
+        >
+          <h2 id="booking-title">Book an appointment</h2>
+
+          <label for="service">Service</label>
+          <select id="service" name="service">
+            <option value="">Choose a service</option>
+            <option>General check-up</option>
+            <option>Pediatrics</option>
+            <option>Dental care</option>
+            <option>Laboratory tests</option>
+            <option>Vaccination</option>
+          </select>
+
+          <label for="doctor">Doctor</label>
+          <select id="doctor" name="doctor">
+            <option value="">Any available doctor</option>
+            <option>Dr. Santos</option>
+            <option>Dr. Reyes</option>
+            <option>Dr. Dela Cruz</option>
+          </select>
+
+          <label for="date">Date</label>
+          <input type="date" id="date" name="date" />
+
+          <fieldset class="slots">
+            <legend>Available times</legend>
+            <input
+              type="radio"
+              id="t1"
+              name="time"
+              value="09:00"
+              checked
+            /><label for="t1">9:00 AM</label>
+            <input type="radio" id="t2" name="time" value="09:30" /><label
+              for="t2"
+              >9:30 AM</label
+            >
+            <input
+              type="radio"
+              id="t3"
+              name="time"
+              value="10:30"
+              disabled
+            /><label for="t3">10:30 AM</label>
+            <input type="radio" id="t4" name="time" value="13:00" /><label
+              for="t4"
+              >1:00 PM</label
+            >
+            <input type="radio" id="t5" name="time" value="14:30" /><label
+              for="t5"
+              >2:30 PM</label
+            >
+            <input type="radio" id="t6" name="time" value="15:30" /><label
+              for="t6"
+              >3:30 PM</label
+            >
+          </fieldset>
+
+          <button type="submit" class="btn btn-solid btn-block">
+            Book appointment
+          </button>
+          <p class="form-hint">Crossed-out times are already taken.</p>
+        </form>
+      </section>
+
+      <!-- SERVICES -->
+      <section class="section" id="services">
+        <div class="section-head">
+          <h2>What you can book</h2>
+          <p>
+            Pick a service, then choose a doctor and a time that fits your day.
+          </p>
+        </div>
+        <ul class="services">
+          <li>
+            <h3>General check-up</h3>
+            <p>Routine exams, consultations, and follow-ups.</p>
+          </li>
+          <li>
+            <h3>Pediatrics</h3>
+            <p>Care for infants, children, and teens.</p>
+          </li>
+          <li>
+            <h3>Dental care</h3>
+            <p>Cleaning, fillings, and dental consultations.</p>
+          </li>
+          <li>
+            <h3>Laboratory tests</h3>
+            <p>Blood work and urinalysis, with results saved to your record.</p>
+          </li>
+          <li>
+            <h3>Vaccination</h3>
+            <p>Flu, hepatitis, and school-required shots.</p>
+          </li>
+          <li>
+            <h3>Medical certificates</h3>
+            <p>Request school and work certificates after your visit.</p>
+          </li>
+        </ul>
+      </section>
+
+      <!-- HOW IT WORKS -->
+      <section class="section how" id="how">
+        <div class="section-head">
+          <h2>How it works</h2>
+        </div>
+        <ol class="steps">
+          <li>
+            <span class="step-no">1</span>
+            <h3>Open Medisync</h3>
+            <p>
+              Login or open Medisync with your account to start your patient
+              record.
+            </p>
+          </li>
+          <li>
+            <span class="step-no">2</span>
+            <h3>Choose a time</h3>
+            <p>Select a service, a doctor, and an open slot on the calendar.</p>
+          </li>
+          <li>
+            <span class="step-no">3</span>
+            <h3>Get a reminder</h3>
+            <p>We confirm your booking and remind you before the visit.</p>
+          </li>
+        </ol>
+      </section>
+    </main>
+
+    <footer class="site-footer" id="contact">
+      <div>
+        <a href="patient-home.html" class="brand brand-light"
+          >Medi<span>sync</span></a
+        >
+        <p>Clinic Patient and Appointment System</p>
+      </div>
+      <div>
+        <h3>Clinic hours</h3>
+        <p>Mon to Sat, 8:00 AM to 5:00 PM</p>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <p>(045) 000-0000<br />hello@medisync.example</p>
+      </div>
+    </footer>
+
+    <script src="patient.js"></script>
+  </body>
+</html>
