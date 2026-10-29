@@ -21,18 +21,17 @@
     </header>
 
     <main class="login-main">
-      <section class="login-card-patient" aria-labelledby="login-title">
-        <nav class="login-tabs" aria-label="Choose account type">
-          <a href="patient-login.html" class="active" aria-current="page"
-            >Patient</a
-          >
+      <section class="login-card-patient">
+        <nav class="login-tabs">
+          <a href="patient-login.html" class="active">Patient</a>
           <a href="staff-login.html">Clinic staff</a>
         </nav>
 
         <h1 id="login-title">Welcome back</h1>
         <p class="login-phrase">Log in to see and manage your appointments.</p>
 
-        <div id="loginMessage" class="login-message" role="alert" hidden></div>
+        <!-- para sa js = login error message (get by id) -->
+        <div id="loginMessage" class="login-message" hidden></div>
 
         <form id="loginForm" class="login-form" novalidate>
           <div class="login-field">
@@ -61,7 +60,7 @@
         </form>
 
         <p class="login-alternative">
-          New to Medisync? <a href="register.html">Create an account</a>
+          New to Medisync? <a href="patient-register.html">Create an account</a>
         </p>
       </section>
     </main>
