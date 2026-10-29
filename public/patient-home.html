@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Medisync Home | Clinic Patient and Appointment System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="patient.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="patient-home.html" class="brand">Medi<span>sync</span></a>
+      <nav class="nav">
+        <a href="#services">Services</a>
+        <a href="#how">How it works</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div class="header-actions">
+        <button
+          type="button"
+          class="user-btn"
+          id="userMenuBtn"
+          aria-expanded="false"
+        >
+          <span class="avatar" id="userInitial">P</span>
+          <span class="user-name" id="userName">Patient</span>
+          <span class="chevron"></span>
+        </button>
+
+        <ul class="user-menu" id="userMenu" hidden>
+          <li><a href="patient-dashboard.html">Dashboard</a></li>
+          <li><button type="button" id="logoutBtn">Log out</button></li>
+        </ul>
+      </div>
+    </header>
+
+    <main>
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-copy">
+          <h1>Book your clinic visit in a few clicks.</h1>
+          <p class="lead">
+            Request an appointment online and the clinic will confirm your
+            schedule.
+          </p>
+          <div class="hero-actions">
+            <a
+              href="patient-request-appointment.html"
+              class="btn btn-solid"
+              id="btn-request-appointment"
+              >Request an appointment</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- SERVICES -->
+      <section class="section" id="services">
+        <div class="section-head">
+          <h2>What you can request</h2>
+          <p>The services our clinic has to offer.</p>
+        </div>
+        <ul class="services">
+          <li>
+            <h3>General check-up</h3>
+            <p>Routine exams, consultations, and follow-ups.</p>
+          </li>
+          <li>
+            <h3>Pediatrics</h3>
+            <p>Care for infants, children, and teens.</p>
+          </li>
+          <li>
+            <h3>Dental care</h3>
+            <p>Cleaning, fillings, and dental consultations.</p>
+          </li>
+          <li>
+            <h3>Laboratory tests</h3>
+            <p>Blood work and urinalysis.</p>
+          </li>
+          <li>
+            <h3>Vaccination</h3>
+            <p>Flu, hepatitis, and school-required shots.</p>
+          </li>
+          <li>
+            <h3>Medical certificates</h3>
+            <p>Request school and work certificates after your visit.</p>
+          </li>
+        </ul>
+      </section>
+
+      <!-- HOW IT WORKS -->
+      <section class="section how" id="how">
+        <div class="section-head">
+          <h2>How it works</h2>
+        </div>
+        <ol class="steps">
+          <li>
+            <span class="step-no">1</span>
+            <h3>Log in or register</h3>
+            <p>
+              Create a free patient account, or log in to start your request.
+            </p>
+          </li>
+          <li>
+            <span class="step-no">2</span>
+            <h3>Choose a doctor and time</h3>
+            <p>
+              Pick your preferred doctor, select one of their services, then
+              choose the date and time that suits you.
+            </p>
+          </li>
+          <li>
+            <span class="step-no">3</span>
+            <h3>Track your request</h3>
+            <p>
+              The clinic reviews it and confirms or declines. Check 'My
+              Appointments' to see whether it's Pending, Confirmed, or Done.
+            </p>
+          </li>
+        </ol>
+      </section>
+    </main>
+
+    <footer class="site-footer" id="contact">
+      <div>
+        <a href="index.html" class="brand brand-light">Medi<span>sync</span></a>
+        <p>Clinic Patient and Appointment System</p>
+      </div>
+      <div>
+        <h3>Clinic hours</h3>
+        <p>Mon to Sat, 8:00 AM to 5:00 PM</p>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <p>(045) 000-0000<br />hello@medisync.example</p>
+      </div>
+    </footer>
+
+    <script src="patient.js"></script>
+  </body>
+</html>
