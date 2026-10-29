@@ -15,15 +15,14 @@
   <body>
     <header class="site-header">
       <a href="index.html" class="brand">Medi<span>sync</span></a>
-      <nav class="nav" aria-label="Main">
+      <nav class="nav">
         <a href="#services">Services</a>
         <a href="#how">How it works</a>
-        <a href="#portals">Patients and staff</a>
         <a href="#contact">Contact</a>
       </nav>
       <div class="header-actions">
         <a href="patient-login.html" class="btn btn-text">Log in</a>
-        <a href="register.html" class="btn btn-solid">Register</a>
+        <a href="patient-register.html" class="btn btn-solid">Register</a>
       </div>
     </header>
 
@@ -31,21 +30,25 @@
       <!-- HERO -->
       <section class="hero">
         <div class="hero-copy">
-          <h1>Book your clinic visit in under a minute.</h1>
+          <h1>Book your clinic visit in a few clicks.</h1>
           <p class="lead">
-            Medisync keeps your appointments, records, and reminders in one
-            place, so you spend less time in the waiting room and more time
-            getting care.
+            Request an appointment online and the clinic will confirm your
+            schedule.
           </p>
+          <div class="hero-actions">
+            <a href="patient-register.html" class="btn btn-solid"
+              >Request an appointment</a
+            >
+            <a href="staff-login.html" class="btn btn-outline">Staff log in</a>
+          </div>
+        </div>
       </section>
 
       <!-- SERVICES -->
       <section class="section" id="services">
         <div class="section-head">
-          <h2>What you can book</h2>
-          <p>
-            Pick a service, then choose a doctor and a time that fits your day.
-          </p>
+          <h2>What you can request</h2>
+          <p>The services our clinic has to offer.</p>
         </div>
         <ul class="services">
           <li>
@@ -62,7 +65,7 @@
           </li>
           <li>
             <h3>Laboratory tests</h3>
-            <p>Blood work and urinalysis, with results saved to your record.</p>
+            <p>Blood work and urinalysis.</p>
           </li>
           <li>
             <h3>Vaccination</h3>
@@ -83,21 +86,26 @@
         <ol class="steps">
           <li>
             <span class="step-no">1</span>
-            <h3>Create your account</h3>
+            <h3>Log in or register</h3>
             <p>
-              Register once with your basic details to start your patient
-              record.
+              Create a free patient account, or log in to start your request.
             </p>
           </li>
           <li>
             <span class="step-no">2</span>
-            <h3>Choose a time</h3>
-            <p>Select a service, a doctor, and an open slot on the calendar.</p>
+            <h3>Choose a doctor and time</h3>
+            <p>
+              Pick your preferred doctor, select one of their services, then
+              choose the date and time that suits you.
+            </p>
           </li>
           <li>
             <span class="step-no">3</span>
-            <h3>Get a reminder</h3>
-            <p>We confirm your booking and remind you before the visit.</p>
+            <h3>Track your request</h3>
+            <p>
+              The clinic reviews it and confirms or declines. Check 'My
+              Appointments' to see whether it's Pending, Confirmed, or Done.
+            </p>
           </li>
         </ol>
       </section>
@@ -108,16 +116,18 @@
           <article class="portal portal-patient">
             <h2>For patients</h2>
             <p>
-              View upcoming visits, reschedule or cancel, and see your visit
-              history.
+              Send an appointment request, track your requests and view upcoming
+              visits.
             </p>
-            <a href="patient-login.html" class="btn btn-solid">Patient log in</a>
+            <a href="patient-login.html" class="btn btn-solid"
+              >Patient log in</a
+            >
           </article>
           <article class="portal portal-staff">
             <h2>For clinic staff</h2>
             <p>
-              Manage the daily schedule, update patient records, and confirm
-              walk-ins.
+              Confirm or decline appointment requests, book walk-ins, and keep
+              patient records up to date.
             </p>
             <a href="staff-login.html" class="btn btn-light">Staff log in</a>
           </article>
