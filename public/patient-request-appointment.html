@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Request an appointment | Medisync</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="patient.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="patient-home.html" class="brand">Medi<span>sync</span></a>
+      <nav class="nav">
+        <a href="patient-dashboard.html">My appointments</a>
+        <a href="patient-request-appointment.html" class="nav-current"
+          >Request appointment</a
+        >
+      </nav>
+
+      <div class="header-actions">
+        <button
+          type="button"
+          class="user-btn"
+          id="userMenuBtn"
+          aria-expanded="false"
+        >
+          <span class="avatar" id="userInitial">P</span>
+          <span class="user-name" id="userName">Patient</span>
+          <span class="chevron"></span>
+        </button>
+
+        <ul class="user-menu" id="userMenu" hidden>
+          <li><a href="patient-dashboard.html">Dashboard</a></li>
+          <li><button type="button" id="logoutBtn">Log out</button></li>
+        </ul>
+      </div>
+    </header>
+
+    <main class="page page-narrow">
+      <div class="page-head">
+        <div>
+          <h1>Request an appointment</h1>
+          <p>Choose a doctor, a service, and the time that suits you.</p>
+        </div>
+      </div>
+
+      <!-- script: set text, remove [hidden]; add .success for green -->
+      <div id="requestMessage" class="page-message" hidden></div>
+
+      <section class="panel">
+        <h2 id="request-title">Appointment details</h2>
+
+        <form id="requestForm" class="form-grid" novalidate>
+          <div class="field field-wide">
+            <label for="requestDoctor">Preferred doctor</label>
+            <select id="requestDoctor" name="doctor" required>
+              <option value="">Loading doctors...</option>
+            </select>
+          </div>
+
+          <div class="field field-wide">
+            <label for="requestService">Service</label>
+            <select id="requestService" name="service" required disabled>
+              <option value="">Choose a doctor first</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="requestDate">Preferred date</label>
+            <input type="date" id="requestDate" name="date" required />
+          </div>
+
+          <div class="field">
+            <label for="requestTime">Preferred time</label>
+            <input
+              type="time"
+              id="requestTime"
+              name="time"
+              min="08:00"
+              max="17:00"
+              step="1800"
+              required
+            />
+          </div>
+
+          <div class="field field-wide">
+            <label for="requestNotes">Notes (optional)</label>
+            <textarea
+              id="requestNotes"
+              name="notes"
+              rows="3"
+              maxlength="200"
+              placeholder="Anything the clinic should know before your visit"
+            ></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-solid btn-block">
+              Send request
+            </button>
+          </div>
+        </form>
+
+        <p class="table-phrase">
+          Clinic hours: Mon to Sat, 8:00 AM to 5:00 PM. Your request stays
+          Pending until the clinic confirms.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer" id="contact">
+      <div>
+        <a href="patient-home.html" class="brand brand-light"
+          >Medi<span>sync</span></a
+        >
+        <p>Clinic Patient and Appointment System</p>
+      </div>
+      <div>
+        <h3>Clinic hours</h3>
+        <p>Mon to Sat, 8:00 AM to 5:00 PM</p>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <p>(045) 000-0000<br />hello@medisync.example</p>
+      </div>
+    </footer>
+
+    <script src="patient.js"></script>
+  </body>
+</html>
