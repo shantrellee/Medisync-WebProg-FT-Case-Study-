@@ -21,15 +21,10 @@
     </header>
 
     <main class="login-main">
-      <section
-        class="login-card-patient login-card-staff"
-        aria-labelledby="staff-login-title"
-      >
-        <nav class="login-tabs" aria-label="Choose account type">
+      <section class="login-card-patient login-card-staff">
+        <nav class="login-tabs">
           <a href="patient-login.html">Patient</a>
-          <a href="staff-login.html" class="active" aria-current="page"
-            >Clinic staff</a
-          >
+          <a href="staff-login.html" class="active">Clinic staff</a>
         </nav>
 
         <h1 id="staff-login-title">Staff log in</h1>
@@ -37,7 +32,7 @@
           Manage today's schedule, patient records, and walk-ins.
         </p>
 
-        <div id="staffMessage" class="login-message" role="alert" hidden></div>
+        <div id="staffMessage" class="login-message" ="alert" hidden></div>
 
         <form id="staffForm" class="login-form" novalidate>
           <div class="login-field">
