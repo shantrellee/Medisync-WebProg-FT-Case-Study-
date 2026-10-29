@@ -1,107 +1,221 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
+app.use(cors());
 app.use(express.json());
-app.use(express.static('public')); 
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
-mongoose.connect('mongodb://127.0.0.1:27017/clinicDB')
-  .then(() => console.log('Connected to MongoDB'))
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/clinicDB';
+mongoose.connect(MONGO_URI)
+  .then(() => console.log('Connected to MongoDB (clinicDB)'))
   .catch(err => console.error('MongoDB connection error:', err));
 
 
-// Patient 
 const patientSchema = new mongoose.Schema({
-  fullName: { type: String, required: true },
-  age: { type: Number, required: true },
-  gender: { type: String, required: true },
-  contactNumber: { type: String, required: true }
-});
+  name: { type: String, required: true, trim: true },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  password: { type: String, required: true }
+}, { timestamps: true });
 
 const Patient = mongoose.model('Patient', patientSchema);
 
-// Appointment 
+const staffSchema = new mongoose.Schema({
+  staffId: { type: String, required: true, unique: true, trim: true },
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true, lowercase: true },
+  password: { type: String, required: true }
+}, { timestamps: true });
+
+const Staff = mongoose.model('Staff', staffSchema);
+
 const appointmentSchema = new mongoose.Schema({
   patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Patient', required: true },
-  appointmentDate: { type: Date, required: true },
-  reason: { type: String, required: true },
-  status: { type: String, default: 'Pending' }
-});
+  doctor: { type: String, required: true },
+  service: { type: String, required: true },
+  date: { type: String, required: true }, // Format: YYYY-MM-DD
+  time: { type: String, required: true }, // Format: HH:MM
+  notes: { type: String, trim: true, default: '' },
+  status: { 
+    type: String, 
+    enum: ['Pending', 'Confirmed', 'Done', 'Cancelled'], 
+    default: 'Pending' 
+  }
+}, { timestamps: true });
 
 const Appointment = mongoose.model('Appointment', appointmentSchema);
 
+const clinicCatalog = [
+  {
+    doctor: "Dr. Sarah Salvatore (General Medicine)",
+    services: ["General Consultation", "Routine Physical", "Prescription Refill"]
+  },
+  {
+    doctor: "Dr. Tom Avery (Pediatrics)",
+    services: ["Well-Child Checkup", "Immunization", "Pediatric Consultation"]
+  },
+  {
+    doctor: "Dr. Elena Gilbert (Dentistry)",
+    services: ["Dental Cleaning", "Tooth Extraction", "Dental Checkup"]
+  }
+];
 
-app.post('/api/patients', async (req, res) => {
+app.get('/api/clinic/catalog', (req, res) => {
+  res.json(clinicCatalog);
+});
+
+// !! AUTHENTICATION ROUTES !!
+
+app.post('/api/auth/patient/register', async (req, res, next) => {
   try {
-    const patient = new Patient(req.body);
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    const existing = await Patient.findOne({ email });
+    if (existing) {
+      return res.status(409).json({ error: 'An account with this email already exists' });
+    }
+
+    const patient = new Patient({ name, email, password });
     await patient.save();
-    res.status(201).json(patient);
+
+    res.status(201).json({
+      message: 'Account created successfully',
+      patient: { id: patient._id, name: patient.name, email: patient.email }
+    });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 });
 
-app.get('/api/patients', async (req, res) => {
+// Patient Login
+app.post('/api/auth/patient/login', async (req, res, next) => {
   try {
-    const { name } = req.query;
-    const filter = name ? { fullName: { $regex: name, $options: 'i' } } : {};
-    const patients = await Patient.find(filter);
-    res.json(patients);
+    const { email, password } = req.body;
+    const patient = await Patient.findOne({ email, password });
+
+    if (!patient) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    res.json({
+      message: 'Login successful',
+      patient: { id: patient._id, name: patient.name, email: patient.email }
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 });
 
-app.post('/api/appointments', async (req, res) => {
+// Staff Login
+app.post('/api/auth/staff/login', async (req, res, next) => {
   try {
-    const appointment = new Appointment(req.body);
-    await appointment.save();
-    res.status(201).json(appointment);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-app.get('/api/appointments', async (req, res) => {
-  try {
-    const appointments = await Appointment.find().populate('patientId');
-    res.json(appointments);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.patch('/api/appointments/:id/done', async (req, res) => {
-  try {
-    const updated = await Appointment.findByIdAndUpdate(
-      req.params.id,
-      { status: 'Done' },
-      { new: true }
-    );
-    res.json(updated);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-app.get('/api/appointments/today/count', async (req, res) => {
-  try {
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
-
-    const count = await Appointment.countDocuments({
-      appointmentDate: { $gte: startOfDay, $lte: endOfDay }
+    const { staffId, password } = req.body;
+    
+    // !! STAFF VALIDATION !!
+    const staff = await Staff.findOne({
+      $or: [{ staffId: staffId }, { email: staffId.toLowerCase() }],
+      password: password
     });
 
-    res.json({ count });
+    if (!staff) {
+      return res.status(401).json({ error: 'Invalid staff ID or password' });
+    }
+
+    res.json({
+      message: 'Staff login successful',
+      staff: { id: staff._id, staffId: staff.staffId, name: staff.name }
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
+});
+
+// !! APPOINTMENT ROUTES !!
+
+app.post('/api/appointments', async (req, res, next) => {
+  try {
+    const { patientId, doctor, service, date, time, notes } = req.body;
+
+    if (!patientId || !doctor || !service || !date || !time) {
+      return res.status(400).json({ error: 'Please provide all required appointment fields' });
+    }
+
+    const appointment = new Appointment({
+      patientId,
+      doctor,
+      service,
+      date,
+      time,
+      notes: notes || ''
+    });
+
+    await appointment.save();
+    res.status(201).json({ message: 'Appointment requested successfully', appointment });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/patients/:patientId/appointments', async (req, res, next) => {
+  try {
+    const appointments = await Appointment.find({ patientId: req.params.patientId })
+      .sort({ date: 1, time: 1 });
+    res.json(appointments);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/appointments', async (req, res, next) => {
+  try {
+    const appointments = await Appointment.find()
+      .populate('patientId', 'name email')
+      .sort({ date: 1, time: 1 });
+    res.json(appointments);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.patch('/api/appointments/:id/status', async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    const updated = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ error: 'Appointment not found' });
+    res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/appointments/today/count', async (req, res, next) => {
+  try {
+    const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    const count = await Appointment.countDocuments({ date: today });
+    res.json({ count, date: today });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status || 500).json({ error: err.message || 'Server error' });
 });
 
 app.listen(PORT, () => {
