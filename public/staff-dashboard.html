@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard | Medisync Staff</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="patient.css" />
+    <link rel="stylesheet" href="staff.css" />
+  </head>
+  <body class="staff-body" data-page="dashboard">
+    <div class="staff-nav">
+      <aside class="sidebar">
+        <a href="staff-dashboard.html" class="brand">Medi<span>sync</span></a>
+        <nav class="side-nav">
+          <a href="staff-dashboard.html" id="staff-dashboard-sidebar"
+            >Dashboard</a
+          >
+          <a href="staff-patients.html" id="staff-patients-sidebar">Patients</a>
+          <a href="staff-appointments.html" id="staff-appointments-sidebar"
+            >Appointments</a
+          >
+        </nav>
+        <div class="side-foot">
+          <p>Signed in as staff</p>
+          <button type="button" id="logoutBtn" class="btn btn-outline btn-sm">
+            Log out
+          </button>
+        </div>
+      </aside>
+
+      <main class="staff-main">
+        <div class="staff-head"><h1>Dashboard</h1></div>
+
+        <div id="staffMessage" class="page-message" hidden></div>
+
+        <section class="stats-row stats-three">
+          <div class="stat-card">
+            <span class="stat-label">Today's appointments</span>
+            <span class="stat-number good" id="statToday">0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Pending requests</span>
+            <span class="stat-number pending" id="statPending">0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Total patients</span>
+            <span class="stat-number" id="statPatients">0</span>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 id="schedule-title">Today's schedule</h2>
+          <ul class="schedule-list" id="scheduleList">
+            <li class="empty">Loading...</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+
+    <!-- <script src="staff.js"></script> (to be added)-->
+  </body>
+</html>
