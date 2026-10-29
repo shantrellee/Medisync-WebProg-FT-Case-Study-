@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>My appointments | Medisync</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="patient.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="patient-home.html" class="brand">Medi<span>sync</span></a>
+      <nav class="nav">
+        <a href="patient-dashboard.html" class="nav-current">My appointments</a>
+        <a href="patient-request-appointment.html">Request appointment</a>
+      </nav>
+
+      <div class="header-actions">
+        <button
+          type="button"
+          class="user-btn"
+          id="userMenuBtn"
+          aria-expanded="false"
+        >
+          <span class="avatar" id="userInitial">P</span>
+          <span class="user-name" id="userName">Patient</span>
+          <span class="chevron"></span>
+        </button>
+
+        <ul class="user-menu" id="userMenu" hidden>
+          <li><a href="patient-dashboard.html">Dashboard</a></li>
+          <li><button type="button" id="logoutBtn">Log out</button></li>
+        </ul>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="page-head">
+        <div>
+          <h1>My appointments</h1>
+          <p>Track your requests and see your visit history.</p>
+        </div>
+        <a href="patient-request-appointment.html" class="btn btn-solid"
+          >Request an appointment</a
+        >
+      </div>
+
+      <!-- script: set text, remove [hidden]; add .success for green -->
+      <div id="dashMessage" class="page-message" hidden></div>
+
+      <section class="stats-row">
+        <div class="stat-card">
+          <span class="stat-number" id="statTotal">0</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-card stat-card-primary">
+          <span class="stat-number" id="statUpcoming">0</span>
+          <span class="stat-label">Upcoming (confirmed)</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="statPending">0</span>
+          <span class="stat-label">Pending</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="statDone">0</span>
+          <span class="stat-label">Completed</span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="toolbar">
+          <h2 id="appointments-title">Appointment list</h2>
+          <div class="toolbar-controls">
+            <label for="apptFilter" class="visually-hidden"
+              >Filter by status</label
+            >
+            <select id="apptFilter">
+              <option value="">All statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Done">Done</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Doctor</th>
+                <th>Service</th>
+                <th>Date and time</th>
+                <th>Status</th>
+                <th class="col-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="appointmentTableBody">
+              <tr>
+                <td colspan="5" class="empty">Loading... (placeholder lang)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="table-phrase">Pending requests are reviewed by the clinic.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer" id="contact">
+      <div>
+        <a href="patient-home.html" class="brand brand-light"
+          >Medi<span>sync</span></a
+        >
+        <p>Clinic Patient and Appointment System</p>
+      </div>
+      <div>
+        <h3>Clinic hours</h3>
+        <p>Mon to Sat, 8:00 AM to 5:00 PM</p>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <p>(045) 000-0000<br />hello@medisync.example</p>
+      </div>
+    </footer>
+
+    <script src="patient.js"></script>
+  </body>
+</html>
