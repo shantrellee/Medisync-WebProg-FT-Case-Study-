@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>New appointment | Medisync Staff</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="patient.css" />
+    <link rel="stylesheet" href="staff.css" />
+  </head>
+  <body class="staff-body" data-page="appointment-form">
+    <div class="staff-layout">
+      <aside class="sidebar">
+        <a href="staff-dashboard.html" class="brand">Medi<span>sync</span></a>
+        <nav class="side-nav" aria-label="Staff">
+          <a href="staff-dashboard.html">Dashboard</a>
+          <a href="staff-patients.html">Patients</a>
+          <a href="staff-appointments.html">Appointments</a>
+        </nav>
+        <div class="side-foot">
+          <p>Signed in as staff</p>
+          <button type="button" id="logoutBtn" class="btn btn-outline btn-sm">Log out</button>
+        </div>
+      </aside>
+
+      <main class="staff-main">
+        <div class="staff-head"><h1>New appointment</h1></div>
+
+        <!-- A 409 from the server (doctor already booked) shows here as a warning -->
+        <div id="staffMessage" class="page-message" role="alert" hidden></div>
+
+        <section class="panel">
+          <form id="appointmentForm" class="form-grid" novalidate>
+            <div class="field">
+              <label for="appointmentPatient">Patient</label>
+              <select id="appointmentPatient" name="patient" required>
+                <option value="">Loading...</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="appointmentDoctor">Doctor</label>
+              <select id="appointmentDoctor" name="doctor" required>
+                <option value="">Loading...</option>
+              </select>
+            </div>
+
+            <div class="field field-wide">
+              <label for="appointmentService">Service</label>
+              <select id="appointmentService" name="service" required disabled>
+                <option value="">Choose a doctor first</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="appointmentDate">Date</label>
+              <input type="date" id="appointmentDate" name="date" required />
+            </div>
+            <div class="field">
+              <label for="appointmentTime">Time</label>
+              <input type="time" id="appointmentTime" name="time" min="08:00" max="17:00" step="1800" required />
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-solid">Save appointment</button>
+              <a href="staff-appointments.html" class="btn btn-outline">Cancel</a>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <script src="staff.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
