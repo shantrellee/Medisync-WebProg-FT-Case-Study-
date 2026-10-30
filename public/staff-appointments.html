@@ -1,1 +1,121 @@
-<!-- staff dashboard tab appointments -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Appointments | Medisync Staff</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="patient.css" />
+    <link rel="stylesheet" href="staff.css" />
+  </head>
+  <body class="staff-body" data-page="appointments">
+    <div class="staff-layout">
+      <aside class="sidebar">
+        <a href="staff-dashboard.html" class="brand">Medi<span>sync</span></a>
+        <nav class="side-nav" aria-label="Staff">
+          <a href="staff-dashboard.html">Dashboard</a>
+          <a href="staff-patients.html">Patients</a>
+          <a href="staff-appointments.html" class="active">Appointments</a>
+        </nav>
+        <div class="side-foot">
+          <p>Signed in as staff</p>
+          <button type="button" id="logoutBtn" class="btn btn-outline btn-sm">
+            Log out
+          </button>
+        </div>
+      </aside>
+
+      <main class="staff-main">
+        <div class="staff-head">
+          <h1>Appointments</h1>
+          <a href="staff-appointment-form.html" class="btn btn-solid"
+            >+ New appointment</a
+          >
+        </div>
+
+        <div id="staffMessage" class="page-message" role="status" hidden></div>
+
+        <div
+          class="pills"
+          id="appointmentFilters"
+          aria-label="Filter appointments"
+        >
+          <button
+            type="button"
+            class="pill active"
+            data-filter=""
+            aria-pressed="true"
+          >
+            All
+          </button>
+          <button
+            type="button"
+            class="pill"
+            data-filter="Pending"
+            aria-pressed="false"
+          >
+            Pending <span class="pill-count" id="pendingCount">0</span>
+          </button>
+          <button
+            type="button"
+            class="pill"
+            data-filter="Confirmed"
+            aria-pressed="false"
+          >
+            Confirmed
+          </button>
+          <button
+            type="button"
+            class="pill"
+            data-filter="Done"
+            aria-pressed="false"
+          >
+            Done
+          </button>
+          <button
+            type="button"
+            class="pill"
+            data-filter="Rejected"
+            aria-pressed="false"
+          >
+            Rejected
+          </button>
+        </div>
+
+        <section class="panel" aria-label="Appointments">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Patient</th>
+                  <th>Doctor</th>
+                  <th>Service</th>
+                  <th>Date and time</th>
+                  <th>Status</th>
+                  <th class="col-actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="appointmentTableBody">
+                <tr>
+                  <td colspan="6" class="empty">
+                    Loading...(placeholder di magloload hanggat di pa connected
+                    sa backend)
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="staff.js"></script>
+  </body>
+</html>
+
