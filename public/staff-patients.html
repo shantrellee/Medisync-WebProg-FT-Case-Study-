@@ -1,1 +1,95 @@
-<!-- dashboard sidebar tab patients -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Patients | Medisync Staff</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="patient.css" />
+    <link rel="stylesheet" href="staff.css" />
+  </head>
+  <body class="staff-body" data-page="patients">
+    <div class="staff-layout">
+      <aside class="sidebar">
+        <a href="staff-dashboard.html" class="brand">Medi<span>sync</span></a>
+        <nav class="side-nav" aria-label="Staff">
+          <a href="staff-dashboard.html">Dashboard</a>
+          <a href="staff-patients.html" class="active">Patients</a>
+          <a href="staff-appointments.html">Appointments</a>
+        </nav>
+        <div class="side-foot">
+          <p>Signed in as staff</p>
+          <button type="button" id="logoutBtn" class="btn btn-outline btn-sm">
+            Log out
+          </button>
+        </div>
+      </aside>
+
+      <main class="staff-main">
+        <div class="staff-head">
+          <h1>Patients</h1>
+          <a href="staff-patient-form.html" class="btn btn-solid"
+            >+ Add patient</a
+          >
+        </div>
+
+        <div id="staffMessage" class="page-message" role="status" hidden></div>
+
+        <label for="patientSearch" class="visually-hidden"
+          >Search patients</label
+        >
+        <input
+          type="search"
+          id="patientSearch"
+          class="search-input"
+          placeholder="Search by last name"
+        />
+
+        <section class="panel" aria-label="Patient records">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Contact</th>
+                  <th class="col-actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="patientTableBody">
+                <tr>
+                  <td colspan="3" class="empty">
+                    Loading...(placeholder di magloload hanggat di pa connected
+                    sa backend)...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- View patient -->
+        <dialog id="viewDialog" aria-labelledby="viewName">
+          <div class="dialog-form">
+            <h2 id="viewName">Patient</h2>
+            <dl class="details" id="viewDetails"></dl>
+            <h3 class="history-title">Appointment history</h3>
+            <ul class="history-list" id="viewHistory"></ul>
+            <div class="dialog-actions">
+              <button type="button" id="closeView" class="btn btn-outline">
+                Close
+              </button>
+            </div>
+          </div>
+        </dialog>
+      </main>
+    </div>
+
+    <script src="staff.js"></script>
+  </body>
+</html>
