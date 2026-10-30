@@ -21,11 +21,13 @@
         <nav class="side-nav" aria-label="Staff">
           <a href="staff-dashboard.html">Dashboard</a>
           <a href="staff-patients.html">Patients</a>
-          <a href="staff-appointments.html">Appointments</a>
+          <a href="staff-appointments.html" class="active">Appointments</a>
         </nav>
         <div class="side-foot">
           <p>Signed in as staff</p>
-          <button type="button" id="logoutBtn" class="btn btn-outline btn-sm">Log out</button>
+          <button type="button" id="logoutBtn" class="btn btn-outline btn-sm">
+            Log out
+          </button>
         </div>
       </aside>
 
@@ -63,12 +65,24 @@
             </div>
             <div class="field">
               <label for="appointmentTime">Time</label>
-              <input type="time" id="appointmentTime" name="time" min="08:00" max="17:00" step="1800" required />
+              <input
+                type="time"
+                id="appointmentTime"
+                name="time"
+                min="08:00"
+                max="17:00"
+                step="1800"
+                required
+              />
             </div>
 
             <div class="form-actions">
-              <button type="submit" class="btn btn-solid">Save appointment</button>
-              <a href="staff-appointments.html" class="btn btn-outline">Cancel</a>
+              <button type="submit" class="btn btn-solid">
+                Save appointment
+              </button>
+              <a href="staff-appointments.html" class="btn btn-outline"
+                >Cancel</a
+              >
             </div>
           </form>
         </section>
@@ -76,6 +90,5 @@
     </div>
 
     <script src="staff.js"></script>
-    <script src="script.js"></script>
   </body>
 </html>
