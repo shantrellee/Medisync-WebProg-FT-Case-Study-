@@ -1,6 +1,7 @@
 /* ---------- User menu ---------- */
 .header-actions { position: relative; }
 
+
 .user-btn {
   display: flex;
   align-items: center;
@@ -186,6 +187,18 @@
   border: 1px solid var(--border);
   border-radius: 10px;
 }
+.panel textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  resize: vertical;
+}
+
+
 .panel input.invalid,
 .dialog-form input.invalid { border-color: #B91C1C; background: #FEF2F2; }
 

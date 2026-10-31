@@ -1,56 +1,86 @@
 <!doctype html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Create an account | Medisync</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
-</head>
+  </head>
 
-<body class="login-page">
+  <body class="login-page">
     <header class="site-header">
-        <a href="index.html" class="brand">Medi<span>sync</span></a>
-        <div class="header-actions">
-            <a href="index.html" class="btn btn-text">Back to home</a>
-        </div>
+      <a href="index.html" class="brand">Medi<span>sync</span></a>
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-text">Back to home</a>
+      </div>
     </header>
 
     <main class="login-main">
-        <section class="login-card login-card-patient">
-            <h1 id="register-title">Create an account</h1>
-            <div id="registerMessage" class="login-message" hidden></div>
+      <section class="login-card login-card-patient">
+        <h1 id="register-title">Create an account</h1>
+        <div id="registerMessage" class="login-message" hidden></div>
 
-            <form id="registerForm" class="login-form" novalidate>
-                <div class="login-field">
-                    <label for="registerName">Full name</label>
-                    <input type="text" id="registerName" name="name" autocomplete="name" required />
-                </div>
+        <form id="registerForm" class="login-form" novalidate>
+          <div class="login-field">
+            <label for="registerName">Full name</label>
+            <input
+              type="text"
+              id="registerName"
+              name="name"
+              autocomplete="name"
+              required
+            />
+          </div>
 
-                <div class="login-field">
-                    <label for="registerEmail">Email</label>
-                    <input type="email" id="registerEmail" name="email" autocomplete="email" required />
-                </div>
+          <div class="login-field">
+            <label for="registerEmail">Email</label>
+            <input
+              type="email"
+              id="registerEmail"
+              name="email"
+              autocomplete="email"
+              required
+            />
+          </div>
 
-                <div class="login-field">
-                    <label for="registerPassword">Password</label>
-                    <input type="password" id="registerPassword" name="password" autocomplete="new-password" />
-                </div>
+          <div class="login-field">
+            <label for="registerContact">Contact number</label>
+            <input
+              type="tel"
+              id="registerContact"
+              name="contact"
+              autocomplete="tel"
+              inputmode="tel"
+              placeholder="e.g. 0912 345 6789"
+              required
+            />
+          </div>
+          <div class="login-field">
+            <label for="registerPassword">Password</label>
+            <input
+              type="password"
+              id="registerPassword"
+              name="password"
+              autocomplete="new-password"
+            />
+          </div>
 
-                <button type="submit" class="btn btn-solid btn-block">
+          <button type="submit" class="btn btn-solid btn-block">
             Create account
           </button>
-            </form>
+        </form>
 
-            <p class="login-alternative">
-                Already registered? <a href="patient-login.html">Log in</a>
-            </p>
-        </section>
+        <p class="login-alternative">
+          Already registered? <a href="patient-login.html">Log in</a>
+        </p>
+      </section>
     </main>
     <script src="script.js"></script>
-</body>
-
+  </body>
 </html>
