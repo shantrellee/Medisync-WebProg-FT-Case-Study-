@@ -1,65 +1,135 @@
-//temp file also
 
-document.addEventListener("DOMContentLoaded", () => {
-    // Staff Logout
-    const logoutBtn = document.getElementById("logoutBtn");
+document.addEventListener('DOMContentLoaded', () => {
+
+    // LOGOUT
+    const logoutBtn = document.getElementById('logoutBtn');
+
     if (logoutBtn) {
-        logoutBtn.addEventListener("click", () => {
+        logoutBtn.addEventListener('click', () => {
             localStorage.clear();
             sessionStorage.clear();
-            window.location.href = "index.html";
+
+            window.location.href = 'index.html';
         });
     }
 
-    // Fetch and display clinic schedule
+    // LOAD STAFF DASHBOARD
     async function loadStaffDashboard() {
+
         const token = localStorage.getItem('token');
-        if (!token) return;
+
+        // Check if user is logged in
+        if (!token) {
+            window.location.href = 'staff-login.html';
+            return;
+        }
 
         try {
-            const response = await fetch('http://localhost:3000/api/appointments', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
 
-            if (!response.ok) throw new Error('Failed to fetch data');
-            const appointments = await response.json();
+            // GET ALL APPOINTMENTS
+            const appointments = await apiRequest('/appointments');
 
-            // Filter for today (matching YYYY-MM-DD from the backend)
-            const today = new Date().toISOString().split('T')[0];
-            const todaysAppointments = appointments.filter(a => a.date === today);
-            const pendingRequests = appointments.filter(a => a.status === 'Pending');
+            // GET TODAY'S APPOINTMENT COUNT
+            const todayData = await apiRequest('/appointments/today/count');
 
-            // Update Stats
-            document.getElementById('statToday').textContent = todaysAppointments.length;
-            document.getElementById('statPending').textContent = pendingRequests.length;
-            document.getElementById('statPatients').textContent = "---";
+            // GET TOTAL PATIENT COUNT
+            const patientData = await apiRequest('/patients/count');
 
-            // Populate Today's Schedule List
-            const scheduleList = document.getElementById('scheduleList');
-            scheduleList.innerHTML = '';
 
-            if (todaysAppointments.length === 0) {
-                scheduleList.innerHTML = '<li class="empty">No appointments scheduled for today.</li>';
-                return;
+            // UPDATE DASHBOARD STATISTICS
+
+            const statTodayEl = document.getElementById('statToday');
+
+            if (statTodayEl) {
+                statTodayEl.textContent = todayData.count;
             }
 
-            todaysAppointments.forEach(appt => {
-                const li = document.createElement('li');
-                const patientName = appt.patientId ? appt.patientId.name : 'Unknown Patient';
+            const statPatientsEl = document.getElementById('statPatients');
 
-                li.innerHTML = `
-          <strong>${appt.time}</strong> - ${patientName} 
-          <span class="service-tag">${appt.service}</span>
-        `;
-                scheduleList.appendChild(li);
-            });
+            if (statPatientsEl) {
+                statPatientsEl.textContent = patientData.count;
+            }
+
+            // COUNT PENDING APPOINTMENTS
+            const pendingRequests = appointments.filter(
+                appointment => appointment.status === 'Pending'
+            );
+
+            const statPendingEl = document.getElementById('statPending');
+
+            if (statPendingEl) {
+                statPendingEl.textContent = pendingRequests.length;
+            }
+
+
+            // FILTER TODAY'S APPOINTMENTS
+            const today = todayData.date;
+
+            const todaysAppointments = appointments.filter(
+                appointment => appointment.date === today
+            );
+
+
+            // DISPLAY TODAY'S SCHEDULE
+            const scheduleList = document.getElementById('scheduleList');
+
+            if (scheduleList) {
+
+                scheduleList.innerHTML = '';
+
+                if (todaysAppointments.length === 0) {
+
+                    scheduleList.innerHTML =
+                        '<li class="empty">No appointments scheduled for today.</li>';
+
+                } else {
+
+                    todaysAppointments.forEach(appointment => {
+
+                        const li = document.createElement('li');
+
+                        const patientName = appointment.patientId
+                            ? appointment.patientId.name
+                            : 'Unknown Patient';
+
+                        li.innerHTML = `
+                            <strong>${appointment.time}</strong> -
+                            ${patientName}
+                            <span class="service-tag">
+                                ${appointment.service}
+                            </span>
+                        `;
+
+                        scheduleList.appendChild(li);
+
+                    });
+
+                }
+
+            }
+
         } catch (error) {
+
             console.error('Error loading staff dashboard:', error);
-            document.getElementById('scheduleList').innerHTML = '<li class="empty">Error loading schedule.</li>';
+
+            const scheduleList = document.getElementById('scheduleList');
+
+            if (scheduleList) {
+                scheduleList.innerHTML =
+                    '<li class="empty">Error loading schedule.</li>';
+            }
+
         }
+
     }
 
-    if (document.getElementById('scheduleList')) {
+
+    // RUN DASHBOARD ONLY IF DASHBOARD ELEMENTS EXIST
+    if (
+        document.getElementById('scheduleList') ||
+        document.getElementById('statToday')
+    ) {
         loadStaffDashboard();
     }
+
 });

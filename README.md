@@ -124,7 +124,6 @@ Copy and paste these directly on your browser:
 ##  Demo Credentials
 
 | Role | Identifier / Email | Password |
-| --- | --- | --- |
 | **Clinic Staff** | `STAFF001` or `admin@medisync.com` | `password123` |
 | **Patient** | Register via `patient-register.html` | Custom password |
 
