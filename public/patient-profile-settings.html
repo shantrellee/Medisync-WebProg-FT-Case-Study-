@@ -63,14 +63,44 @@
 
         <form id="profileForm" class="form-grid" novalidate>
           <div class="field field-wide">
-            <label for="profileName">Full name</label>
+            <label for="profileFirstName">First name</label>
             <input
               type="text"
-              id="profileName"
-              name="name"
-              autocomplete="name"
+              id="profileFirstName"
+              name="profileFirstName"
+              autocomplete="given-name"
               required
             />
+          </div>
+
+          <div class="field field-wide">
+            <label for="profileLastName">Last name</label>
+            <input
+              type="text"
+              id="profileLastName"
+              name="profileLastName"
+              autocomplete="family-name"
+              required
+            />
+          </div>
+
+          <div class="field">
+            <label for="profileBirthDate">Birth date</label>
+            <input
+              type="date"
+              id="profileBirthDate"
+              name="profileBirthDate"
+              required
+            />
+          </div>
+
+          <div class="field">
+            <label for="profileSex">Sex</label>
+            <select id="profileSex" name="sex" required>
+              <option value="">Select</option>
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+            </select>
           </div>
 
           <div class="field">
