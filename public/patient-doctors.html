@@ -19,18 +19,27 @@
       <nav class="nav" aria-label="Main">
         <a href="patient-home.html">Home</a>
         <a href="patient-dashboard.html">My appointments</a>
-        <a href="patient-doctors.html" class="nav-current" aria-current="page">Doctors</a>
+        <a href="patient-doctors.html" class="nav-current" aria-current="page"
+          >Doctors</a
+        >
       </nav>
 
       <div class="header-actions">
-        <button type="button" class="user-btn" id="userMenuBtn" aria-expanded="false">
+        <button
+          type="button"
+          class="user-btn"
+          id="userMenuBtn"
+          aria-expanded="false"
+        >
           <span class="avatar" id="userInitial">P</span>
           <span class="user-name" id="userName">Patient</span>
           <span class="chevron"></span>
         </button>
 
         <ul class="user-menu" id="userMenu" hidden>
-          <li><a href="settings.html">My profile</a></li>
+          <li><a href="patient-home.html">Home</a></li>
+          <li><a href="patient-dashboard.html">Dashboard</a></li>
+          <li><a href="patient-profile-settings.html">My Profile</a></li>
           <li><button type="button" id="logoutBtn">Log out</button></li>
         </ul>
       </div>
@@ -40,7 +49,41 @@
       <div class="page-head">
         <div>
           <h1>Our doctors</h1>
-          <p>See who we have and what each doctor offers. Pick a service to request it.</p>
+          <p>
+            See who we have and what each doctor offers. Pick a service to
+            request it.
+          </p>
         </div>
-        <a href="request-appointment.html" class="btn btn-solid">Request an appointment</a>
+        <a href="request-appointment.html" class="btn btn-solid"
+          >Request an appointment</a
+        >
       </div>
+
+      <div id="doctorMessage" class="page-message" hidden></div>
+
+      <section class="doctor-grid" id="doctorGrid" aria-label="Doctors">
+        <p class="row-note">Loading doctors...</p>
+      </section>
+    </main>
+
+    <footer class="site-footer" id="contact">
+      <div>
+        <a href="patient-home.html" class="brand brand-light"
+          >Medi<span>sync</span></a
+        >
+        <p>Clinic Patient and Appointment System</p>
+      </div>
+      <div>
+        <h3>Clinic hours</h3>
+        <p>Mon to Sat, 8:00 AM to 5:00 PM</p>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <p>(045) 000-0000<br />hello@medisync.example</p>
+      </div>
+    </footer>
+
+    <script src="patient.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
