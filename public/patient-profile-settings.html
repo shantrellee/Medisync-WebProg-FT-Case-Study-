@@ -1,188 +1,131 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>My profile | Medisync</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="patient.css" />
-  </head>
-  <body>
-    <header class="site-header">
-      <a href="patient-home.html" class="brand">Medi<span>sync</span></a>
-      <nav class="nav" aria-label="Main">
-        <a href="patient-home.html">Home</a>
-        <a href="patient-dashboard.html">My appointments</a>
-        <a href="patient-doctors.html">Doctors</a>
-      </nav>
+</head>
 
-      <div class="header-actions">
-        <button
-          type="button"
-          class="user-btn"
-          id="userMenuBtn"
-          aria-expanded="false"
-        >
+<body>
+    <header class="site-header">
+        <a href="patient-home.html" class="brand">Medi<span>sync</span></a>
+        <nav class="nav" aria-label="Main">
+            <a href="patient-home.html">Home</a>
+            <a href="patient-dashboard.html">My appointments</a>
+            <a href="patient-doctors.html">Doctors</a>
+        </nav>
+
+        <div class="header-actions">
+            <button type="button" class="user-btn" id="userMenuBtn" aria-expanded="false">
           <span class="avatar" id="userInitial">P</span>
           <span class="user-name" id="userName">Patient</span>
           <span class="chevron"></span>
         </button>
 
-        <ul class="user-menu" id="userMenu" hidden>
-          <li><a href="patient-home.html">Home</a></li>
-          <li><a href="patient-dashboard.html">Dashboard</a></li>
-          <li><a href="patient-doctors.html">Doctors</a></li>
-          <li><button type="button" id="logoutBtn">Log out</button></li>
-        </ul>
-      </div>
+            <ul class="user-menu" id="userMenu" hidden>
+                <li><a href="patient-home.html">Home</a></li>
+                <li><a href="patient-dashboard.html">Dashboard</a></li>
+                <li><a href="patient-doctors.html">Doctors</a></li>
+                <li><button type="button" id="logoutBtn">Log out</button></li>
+            </ul>
+        </div>
     </header>
 
     <main class="page page-narrow">
-      <div class="page-head">
-        <div>
-          <h1>My profile</h1>
-          <p>Update your name and contact details.</p>
+        <div class="page-head">
+            <div>
+                <h1>My profile</h1>
+                <p>Update your name and contact details.</p>
+            </div>
         </div>
-      </div>
 
-      <!-- script: set text, remove [hidden]; add .success for green -->
-      <div id="profileMessage" class="page-message" hidden></div>
+        <!-- script: set text, remove [hidden]; add .success for green -->
+        <div id="profileMessage" class="page-message" hidden></div>
 
-      <!-- Profile -->
-      <section class="panel" aria-labelledby="profile-title">
-        <h2 id="profile-title">Personal information</h2>
-        <p class="panel-sub">
-          The clinic uses these details to reach you about your appointments.
-        </p>
+        <!-- Profile -->
+        <section class="panel" aria-labelledby="profile-title">
+            <h2 id="profile-title">Personal information</h2>
+            <p class="panel-sub">
+                The clinic uses these details to reach you about your appointments.
+            </p>
 
-        <form id="profileForm" class="form-grid" novalidate>
-          <div class="field field-wide">
-            <label for="profileFirstName">First name</label>
-            <input
-              type="text"
-              id="profileFirstName"
-              name="profileFirstName"
-              autocomplete="given-name"
-              required
-            />
-          </div>
+            <form id="profileForm" class="form-grid" novalidate>
+                <div class="field field-wide">
+                    <label for="profileFirstName">First name</label>
+                    <input type="text" id="profileFirstName" name="profileFirstName" autocomplete="given-name" required />
+                </div>
 
-          <div class="field field-wide">
-            <label for="profileLastName">Last name</label>
-            <input
-              type="text"
-              id="profileLastName"
-              name="profileLastName"
-              autocomplete="family-name"
-              required
-            />
-          </div>
+                <div class="field field-wide">
+                    <label for="profileLastName">Last name</label>
+                    <input type="text" id="profileLastName" name="profileLastName" autocomplete="family-name" required />
+                </div>
 
-          <div class="field">
-            <label for="profileBirthDate">Birth date</label>
-            <input
-              type="date"
-              id="profileBirthDate"
-              name="profileBirthDate"
-              required
-            />
-          </div>
+                <div class="field">
+                    <label for="profileBirthDate">Birth date</label>
+                    <input type="date" id="profileBirthDate" name="profileBirthDate" required />
+                </div>
 
-          <div class="field">
-            <label for="profileSex">Sex</label>
-            <select id="profileSex" name="sex" required>
+                <div class="field">
+                    <label for="profileSex">Sex</label>
+                    <select id="profileSex" name="sex" required>
               <option value="">Select</option>
               <option value="Female">Female</option>
               <option value="Male">Male</option>
             </select>
-          </div>
+                </div>
 
-          <div class="field">
-            <label for="profileEmail">Email</label>
-            <input
-              type="email"
-              id="profileEmail"
-              name="email"
-              autocomplete="email"
-              required
-            />
-          </div>
+                <div class="field">
+                    <label for="profileEmail">Email</label>
+                    <input type="email" id="profileEmail" name="email" autocomplete="email" required />
+                </div>
 
-          <div class="field">
-            <label for="profileContact">Contact number</label>
-            <input
-              type="tel"
-              id="profileContact"
-              name="contact"
-              autocomplete="tel"
-              inputmode="tel"
-              placeholder="e.g. 0917 000 0000"
-              required
-            />
-          </div>
+                <div class="field">
+                    <label for="profileContact">Contact number</label>
+                    <input type="tel" id="profileContact" name="contact" autocomplete="tel" inputmode="tel" placeholder="e.g. 0917 000 0000" required />
+                </div>
 
-          <div class="form-actions">
-            <button type="submit" class="btn btn-solid">Save changes</button>
-          </div>
-        </form>
-      </section>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-solid">Save changes</button>
+                </div>
+            </form>
+        </section>
 
-      <!-- Password (optional: delete this whole section if the backend skips it) -->
-      <section class="panel" aria-labelledby="password-title">
-        <h2 id="password-title">Change password</h2>
+        <!-- Password (optional: delete this whole section if the backend skips it) -->
+        <section class="panel" aria-labelledby="password-title">
+            <h2 id="password-title">Change password</h2>
 
-        <form id="passwordForm" class="form-grid" novalidate>
-          <div class="field field-wide">
-            <label for="currentPassword">Current password</label>
-            <input
-              type="password"
-              id="currentPassword"
-              name="currentPassword"
-              autocomplete="current-password"
-              required
-            />
-          </div>
+            <form id="passwordForm" class="form-grid" novalidate>
+                <div class="field field-wide">
+                    <label for="currentPassword">Current password</label>
+                    <input type="password" id="currentPassword" name="currentPassword" autocomplete="current-password" required />
+                </div>
 
-          <div class="field">
-            <label for="newPassword">New password</label>
-            <input
-              type="password"
-              id="newPassword"
-              name="newPassword"
-              autocomplete="new-password"
-              minlength="6"
-              required
-            />
-          </div>
+                <div class="field">
+                    <label for="newPassword">New password</label>
+                    <input type="password" id="newPassword" name="newPassword" autocomplete="new-password" minlength="6" required />
+                </div>
 
-          <div class="field">
-            <label for="confirmPassword">Confirm new password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              autocomplete="new-password"
-              required
-            />
-          </div>
+                <div class="field">
+                    <label for="confirmPassword">Confirm new password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required />
+                </div>
 
-          <div class="form-actions">
-            <button type="submit" class="btn btn-solid">Update password</button>
-          </div>
-        </form>
-      </section>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-solid">Update password</button>
+                </div>
+            </form>
+        </section>
     </main>
 
     <footer class="site-footer" id="contact">
-      <div>
-        <a href="patient-home.html" class="brand brand-light"
-          >Medi<span>sync</span></a
+        <div>
+            <a href="patient-home.html" class="brand brand-light">Medi<span>sync</span></a
         >
         <p>Clinic Patient and Appointment System</p>
       </div>
@@ -195,8 +138,7 @@
         <p>(045) 000-0000<br />hello@medisync.example</p>
       </div>
     </footer>
-
+    <script src="api.js"></script>
     <script src="patient.js"></script>
-    <script src="script.js"></script>
   </body>
 </html>

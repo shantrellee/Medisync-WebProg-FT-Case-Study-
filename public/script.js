@@ -1,177 +1,178 @@
-  // TEMP CODE !! FOR TESTING ONLY
+document.addEventListener('DOMContentLoaded', () => {
+    const userRole = localStorage.getItem('role');
+    const token = localStorage.getItem('token');
+    const staffData = JSON.parse(sessionStorage.getItem('currentStaff') || '{}');
 
+    // 1. PAGE GUARD: Redirect to login if accessing a protected staff page without a staff token
+    const isProtected = document.querySelector('.sidebar') !== null;
+    if (isProtected && (!token || userRole !== 'staff')) {
+        window.location.href = 'staff-login.html';
+        return;
+    }
 
-  document.addEventListener('DOMContentLoaded', () => {
-      const API_BASE = '/api';
+    // 2. LOGOUT LOGIC
+    if (isProtected) {
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = 'staff-login.html';
+        });
+    }
 
-      const showMessage = (elementId, text, isSuccess = false) => {
-          const el = document.getElementById(elementId);
-          if (!el) return;
-          el.textContent = text;
-          el.hidden = false;
-          if (isSuccess) {
-              el.classList.add('success');
-          } else {
-              el.classList.remove('success');
-          }
-      };
+    // Helper to show messages
+    const showMessage = (elId, msg, isSuccess = false) => {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        el.textContent = msg;
+        el.hidden = false;
+        el.className = `page-message ${isSuccess ? 'success' : ''}`;
+    };
 
-      const registerForm = document.getElementById('registerForm');
-      if (registerForm) {
-          registerForm.addEventListener('submit', async(e) => {
-              e.preventDefault();
-              const name = document.getElementById('registerName').value.trim();
-              const email = document.getElementById('registerEmail').value.trim();
-              const password = document.getElementById('registerPassword').value;
+    // 3. STAFF LOGIN FORM
+    const staffForm = document.getElementById('staffForm');
+    if (staffForm) {
+        staffForm.addEventListener('submit', async(e) => {
+            e.preventDefault();
+            document.querySelector('button[type="submit"]').disabled = true;
+            try {
+                const payload = {
+                    staffId: staffForm.staffId.value.trim(),
+                    password: staffForm.password.value
+                };
+                const data = await apiRequest('/auth/staff/login', { method: 'POST', body: JSON.stringify(payload) });
 
-              try {
-                  const res = await fetch(`${API_BASE}/auth/patient/register`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ name, email, password })
-                  });
-                  const data = await res.json();
-                  if (!res.ok) throw new Error(data.error);
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('role', 'staff');
+                sessionStorage.setItem('currentStaff', JSON.stringify(data.staff));
+                window.location.href = 'staff-dashboard.html';
+            } catch (err) {
+                showMessage('staffMessage', err.message);
+                document.querySelector('button[type="submit"]').disabled = false;
+            }
+        });
+    }
 
-                  showMessage('registerMessage', 'Account created! Redirecting to login...', true);
-                  setTimeout(() => window.location.href = 'patient-login.html', 1500);
-              } catch (err) {
-                  showMessage('registerMessage', err.message);
-              }
-          });
-      }
+    // 4. DASHBOARD (staff-dashboard.html)
+    if (document.getElementById('statToday')) {
+        const loadDashboard = async() => {
+            try {
+                // Load stats
+                const stats = await apiRequest('/staff/stats');
+                document.getElementById('statToday').textContent = stats.todayCount;
+                document.getElementById('statPending').textContent = stats.pendingCount;
+                document.getElementById('statPatients').textContent = stats.patientCount;
 
-      const loginForm = document.getElementById('loginForm');
-      if (loginForm) {
-          loginForm.addEventListener('submit', async(e) => {
-              e.preventDefault();
-              const email = document.getElementById('loginEmail').value.trim();
-              const password = document.getElementById('loginPassword').value;
+                // Load today's schedule
+                const appts = await apiRequest('/appointments');
+                const todayAppts = appts.filter(a => a.date === stats.date && a.status !== 'Cancelled');
 
-              try {
-                  const res = await fetch(`${API_BASE}/auth/patient/login`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ email, password })
-                  });
-                  const data = await res.json();
-                  if (!res.ok) throw new Error(data.error);
-                  localStorage.setItem('token', data.token);
-                  localStorage.setItem('patientId', data.patient.id);
+                const list = document.getElementById('scheduleList');
+                list.innerHTML = '';
 
-                  sessionStorage.setItem('currentPatient', JSON.stringify(data.patient));
-                  window.location.href = 'patient-dashboard.html';
-              } catch (err) {
-                  showMessage('loginMessage', err.message);
-              }
-          });
-      }
+                if (todayAppts.length === 0) {
+                    list.innerHTML = '<li class="empty">No appointments scheduled for today.</li>';
+                } else {
+                    todayAppts.forEach(a => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+              <strong class="sched-time">${escapeHTML(a.time)}</strong> 
+              <div class="sched-info">
+                <span>${escapeHTML(a.patientId?.firstName)} ${escapeHTML(a.patientId?.lastName)}</span>
+                <small>${escapeHTML(a.service)}</small>
+              </div>
+              <span class="badge badge-${a.status.toLowerCase()}">${escapeHTML(a.status)}</span>
+            `;
+                        list.appendChild(li);
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('scheduleList').innerHTML = '<li class="empty">Error loading schedule.</li>';
+            }
+        };
+        loadDashboard();
+    }
 
-      const staffForm = document.getElementById('staffForm');
-      if (staffForm) {
-          staffForm.addEventListener('submit', async(e) => {
-              e.preventDefault();
-              const staffId = document.getElementById('staffId').value.trim();
-              const password = document.getElementById('staffPassword').value;
+    // 5. APPOINTMENTS TABLE (staff-appointments.html)
+    const apptBody = document.getElementById('appointmentTableBody');
+    if (apptBody) {
+        let allAppointments = [];
 
-              try {
-                  const res = await fetch(`${API_BASE}/auth/staff/login`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ staffId, password })
-                  });
-                  const data = await res.json();
-                  if (!res.ok) throw new Error(data.error);
-                  localStorage.setItem('token', data.token);
+        const loadAppointments = async() => {
+            try {
+                allAppointments = await apiRequest('/appointments');
+                renderAppointments(allAppointments);
+                updatePendingCount(allAppointments);
+            } catch (err) {
+                apptBody.innerHTML = '<tr><td colspan="6" class="empty">Error loading data.</td></tr>';
+            }
+        };
 
-                  sessionStorage.setItem('currentStaff', JSON.stringify(data.staff));
-                  window.location.href = 'staff-dashboard.html';
-              } catch (err) {
-                  showMessage('staffMessage', err.message);
-              }
-          });
-      }
+        const renderAppointments = (appointmentsToRender) => {
+            apptBody.innerHTML = '';
+            if (appointmentsToRender.length === 0) {
+                apptBody.innerHTML = '<tr><td colspan="6" class="empty">No appointments found.</td></tr>';
+                return;
+            }
 
-      const requestForm = document.getElementById('requestForm');
-      if (requestForm) {
-          const doctorSelect = document.getElementById('requestDoctor');
-          const serviceSelect = document.getElementById('requestService');
+            appointmentsToRender.forEach(a => {
+                const tr = document.createElement('tr');
+                const isPending = a.status === 'Pending';
+                const isConfirmed = a.status === 'Confirmed';
 
-          let catalog = [];
+                let actions = '';
+                if (isPending) actions += `<button class="btn btn-outline btn-sm" onclick="updateStatus('${a._id}', 'Confirmed')">Confirm</button> `;
+                if (isConfirmed) actions += `<button class="btn btn-solid btn-sm" onclick="updateStatus('${a._id}', 'Done')">Done</button> `;
+                if (isPending || isConfirmed) actions += `<button class="btn btn-text btn-sm" onclick="updateStatus('${a._id}', 'Cancelled')">Cancel</button>`;
 
-          fetch(`${API_BASE}/clinic/catalog`)
-              .then(res => res.json())
-              .then(data => {
-                  catalog = data;
-                  doctorSelect.innerHTML = '<option value="">Select a doctor</option>';
-                  catalog.forEach((item) => {
-                      const opt = document.createElement('option');
-                      opt.value = item.doctor;
-                      opt.textContent = item.doctor;
-                      doctorSelect.appendChild(opt);
-                  });
-              })
-              .catch(() => {
-                  doctorSelect.innerHTML = '<option value="">Failed to load doctors</option>';
-              });
+                tr.innerHTML = `
+          <td>${escapeHTML(a.patientId?.firstName)} ${escapeHTML(a.patientId?.lastName)}<br><small>${escapeHTML(a.patientId?.phone)}</small></td>
+          <td>${escapeHTML(a.doctor)}</td>
+          <td>${escapeHTML(a.service)}</td>
+          <td>${escapeHTML(a.date)} ${escapeHTML(a.time)}</td>
+          <td><span class="badge badge-${a.status.toLowerCase()}">${escapeHTML(a.status)}</span></td>
+          <td>${actions || '-'}</td>
+        `;
+                apptBody.appendChild(tr);
+            });
+        };
 
-          doctorSelect.addEventListener('change', () => {
-              const selectedDoctor = doctorSelect.value;
-              if (!selectedDoctor) {
-                  serviceSelect.innerHTML = '<option value="">Choose a doctor first</option>';
-                  serviceSelect.disabled = true;
-                  return;
-              }
+        const updatePendingCount = (appts) => {
+            const pendingCountEl = document.getElementById('pendingCount');
+            if (pendingCountEl) {
+                pendingCountEl.textContent = appts.filter(a => a.status === 'Pending').length;
+            }
+        };
 
-              const match = catalog.find(item => item.doctor === selectedDoctor);
-              serviceSelect.innerHTML = '<option value="">Select a service</option>';
-              if (match) {
-                  match.services.forEach(srv => {
-                      const opt = document.createElement('option');
-                      opt.value = srv;
-                      opt.textContent = srv;
-                      serviceSelect.appendChild(opt);
-                  });
-                  serviceSelect.disabled = false;
-              }
-          });
+        // Filter Logic
+        document.querySelectorAll('.pill').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.pill').forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-pressed', 'false');
+                });
+                e.currentTarget.classList.add('active');
+                e.currentTarget.setAttribute('aria-pressed', 'true');
 
-          requestForm.addEventListener('submit', async(e) => {
-              e.preventDefault();
-              const currentPatient = JSON.parse(sessionStorage.getItem('currentPatient'));
-              if (!currentPatient) {
-                  showMessage('requestMessage', 'Please log in first before requesting an appointment.');
-                  return;
-              }
+                const filter = e.currentTarget.dataset.filter;
+                if (!filter) {
+                    renderAppointments(allAppointments);
+                } else {
+                    renderAppointments(allAppointments.filter(a => a.status === filter));
+                }
+            });
+        });
 
-              const payload = {
-                  patientId: currentPatient.id,
-                  doctor: doctorSelect.value,
-                  service: serviceSelect.value,
-                  date: document.getElementById('requestDate').value,
-                  time: document.getElementById('requestTime').value,
-                  notes: document.getElementById('requestNotes').value
-              };
+        window.updateStatus = async(id, status) => {
+            if (!confirm(`Mark appointment as ${status}?`)) return;
+            try {
+                await apiRequest(`/appointments/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
+                loadAppointments();
+            } catch (err) {
+                alert(err.message);
+            }
+        };
 
-              try {
-                  const token = localStorage.getItem('token');
-                  const res = await fetch(`${API_BASE}/appointments`, {
-                      method: 'POST',
-                      headers: {
-                          'Content-Type': 'application/json',
-                          'Authorization': `Bearer ${token}`
-                      },
-                      body: JSON.stringify(payload)
-                  });
-                  const data = await res.json();
-                  if (!res.ok) throw new Error(data.error);
-
-                  showMessage('requestMessage', 'Appointment requested successfully!', true);
-                  requestForm.reset();
-                  serviceSelect.disabled = true;
-              } catch (err) {
-                  showMessage('requestMessage', err.message);
-              }
-          });
-      }
-  });
+        loadAppointments();
+    }
+});

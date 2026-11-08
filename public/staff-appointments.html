@@ -1,41 +1,39 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Appointments | Medisync Staff</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="patient.css" />
     <link rel="stylesheet" href="staff.css" />
-  </head>
-  <body class="staff-body" data-page="appointments">
+</head>
+
+<body class="staff-body" data-page="appointments">
     <div class="staff-layout">
-      <aside class="sidebar">
-        <a href="staff-dashboard.html" class="brand">Medi<span>sync</span></a>
-        <nav class="side-nav" aria-label="Staff">
-          <a href="staff-dashboard.html">Dashboard</a>
-          <a href="staff-patients.html">Patients</a>
-          <a href="staff-appointments.html" class="active">Appointments</a>
-        </nav>
-        <div class="side-foot">
-          <p>Signed in as staff</p>
-          <button type="button" id="logoutBtn" class="btn btn-outline btn-sm">
+        <aside class="sidebar">
+            <a href="staff-dashboard.html" class="brand">Medi<span>sync</span></a>
+            <nav class="side-nav" aria-label="Staff">
+                <a href="staff-dashboard.html">Dashboard</a>
+                <a href="staff-patients.html">Patients</a>
+                <a href="staff-appointments.html" class="active">Appointments</a>
+            </nav>
+            <div class="side-foot">
+                <p>Signed in as staff</p>
+                <button type="button" id="logoutBtn" class="btn btn-outline btn-sm">
             Log out
           </button>
-        </div>
-      </aside>
+            </div>
+        </aside>
 
-      <main class="staff-main">
-        <div class="staff-head">
-          <h1>Appointments</h1>
-          <a href="staff-appointment-form.html" class="btn btn-solid"
-            >+ New appointment</a
+        <main class="staff-main">
+            <div class="staff-head">
+                <h1>Appointments</h1>
+                <a href="staff-appointment-form.html" class="btn btn-solid">+ New appointment</a
           >
         </div>
 
@@ -115,8 +113,7 @@
       </main>
     </div>
 
+    <script src="api.js"></script>
     <script src="staff.js"></script>
-    <script src="script.js"></script>
   </body>
 </html>
-

@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = '/api'; // Uses relative path for deployment
 
 async function apiRequest(endpoint, options = {}) {
     const token = localStorage.getItem('token');
@@ -15,8 +15,21 @@ async function apiRequest(endpoint, options = {}) {
     const data = await response.json();
 
     if (!response.ok) {
+        // If token is expired/invalid (401) and it's not a login attempt, kick user out
+        if (response.status === 401 && !endpoint.includes('/auth/')) {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
         throw new Error(data.error || 'Something went wrong');
     }
-
     return data;
+}
+
+// Security helper to prevent XSS attacks when displaying names/notes
+function escapeHTML(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }

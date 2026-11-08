@@ -1,62 +1,51 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Medisync Home | Clinic Patient and Appointment System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="patient.css" />
-  </head>
-  <body>
+</head>
+
+<body>
     <header class="site-header">
-      <a href="patient-home.html" class="brand">Medi<span>sync</span></a>
-      <nav class="nav">
-        <a href="#services">Services</a>
-        <a href="#how">How it works</a>
-        <a href="#contact">Contact</a>
-      </nav>
-      <div class="header-actions">
-        <button
-          type="button"
-          class="user-btn"
-          id="userMenuBtn"
-          aria-expanded="false"
-        >
+        <a href="patient-home.html" class="brand">Medi<span>sync</span></a>
+        <nav class="nav">
+            <a href="#services">Services</a>
+            <a href="#how">How it works</a>
+            <a href="#contact">Contact</a>
+        </nav>
+        <div class="header-actions">
+            <button type="button" class="user-btn" id="userMenuBtn" aria-expanded="false">
           <span class="avatar" id="userInitial">P</span>
           <span class="user-name" id="userName">Patient</span>
           <span class="chevron"></span>
         </button>
 
-        <ul class="user-menu" id="userMenu" hidden>
-          <li><a href="patient-dashboard.html">Dashboard</a></li>
-          <li><a href="patient-doctors.html">Doctors</a></li>
-          <li><a href="patient-profile-settings.html">My Profile</a></li>
-          <li><button type="button" id="logoutBtn">Log out</button></li>
-        </ul>
-      </div>
+            <ul class="user-menu" id="userMenu" hidden>
+                <li><a href="patient-dashboard.html">Dashboard</a></li>
+                <li><a href="patient-doctors.html">Doctors</a></li>
+                <li><a href="patient-profile-settings.html">My Profile</a></li>
+                <li><button type="button" id="logoutBtn">Log out</button></li>
+            </ul>
+        </div>
     </header>
 
     <main>
-      <!-- HERO -->
-      <section class="hero">
-        <div class="hero-copy">
-          <h1>Book your clinic visit in a few clicks.</h1>
-          <p class="lead">
-            Request an appointment online and the clinic will confirm your
-            schedule.
-          </p>
-          <div class="hero-actions">
-            <a
-              href="patient-request-appointment.html"
-              class="btn btn-solid"
-              id="btn-request-appointment"
-              >Request an appointment</a
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-copy">
+                <h1>Book your clinic visit in a few clicks.</h1>
+                <p class="lead">
+                    Request an appointment online and the clinic will confirm your schedule.
+                </p>
+                <div class="hero-actions">
+                    <a href="patient-request-appointment.html" class="btn btn-solid" id="btn-request-appointment">Request an appointment</a
             >
           </div>
         </div>
@@ -132,19 +121,19 @@
     <footer class="site-footer" id="contact">
       <div>
         <a href="index.html" class="brand brand-light">Medi<span>sync</span></a>
-        <p>Clinic Patient and Appointment System</p>
-      </div>
-      <div>
-        <h3>Clinic hours</h3>
-        <p>Mon to Sat, 8:00 AM to 5:00 PM</p>
-      </div>
-      <div>
-        <h3>Contact</h3>
-        <p>(045) 000-0000<br />hello@medisync.example</p>
-      </div>
-    </footer>
+                    <p>Clinic Patient and Appointment System</p>
+                </div>
+                <div>
+                    <h3>Clinic hours</h3>
+                    <p>Mon to Sat, 8:00 AM to 5:00 PM</p>
+                </div>
+                <div>
+                    <h3>Contact</h3>
+                    <p>(045) 000-0000<br />hello@medisync.example</p>
+                </div>
+                </footer>
+                <script src="api.js"></script>
+                <script src="patient.js"></script>
+</body>
 
-    <script src="patient.js"></script>
-    <script src="script.js"></script>
-  </body>
 </html>

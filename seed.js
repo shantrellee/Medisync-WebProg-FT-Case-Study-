@@ -27,8 +27,7 @@ async function seed() {
 
         // 1. Seed Catalog
         await Catalog.deleteMany({});
-        await Catalog.insertMany([
-            {
+        await Catalog.insertMany([{
                 doctor: "Dr. Sarah Salvatore (General Medicine)",
                 services: ["General Consultation", "Routine Physical", "Prescription Refill"]
             },
@@ -43,20 +42,23 @@ async function seed() {
         ]);
         console.log('✓ Clinic Catalog loaded');
 
-        // 2. Seed Default Staff (STAFF001 / admin@medisync.com / password123)
+        // 2. Seed Default Staff using environment variables
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@medisync.com';
+        const adminPass = process.env.ADMIN_PASSWORD || 'password123';
+
         await Staff.deleteMany({
-            $or: [{ staffId: 'STAFF001' }, { email: 'admin@medisync.com' }]
+            $or: [{ staffId: 'STAFF001' }, { email: adminEmail }]
         });
 
-        const hashedPassword = await bcrypt.hash('password123', 10);
+        const hashedPassword = await bcrypt.hash(adminPass, 10);
         await Staff.create({
             staffId: 'STAFF001',
             name: 'Clinic Staff Admin',
-            email: 'admin@medisync.com',
+            email: adminEmail,
             password: hashedPassword,
             role: 'staff'
         });
-        console.log('✓ Default Staff Account Created (ID: STAFF001 / Email: admin@medisync.com / Pass: password123)');
+        console.log(`✓ Default Staff Account Created (ID: STAFF001 / Email: ${adminEmail} / Pass: ${adminPass})`);
 
         console.log('Database initialization complete.');
         process.exit(0);

@@ -1,83 +1,76 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>My appointments | Medisync</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="patient.css" />
-  </head>
-  <body>
-    <header class="site-header">
-      <a href="patient-home.html" class="brand">Medi<span>sync</span></a>
-      <nav class="nav">
-        <a href="patient-dashboard.html" class="nav-current">My appointments</a>
-        <a href="patient-request-appointment.html">Request appointment</a>
-      </nav>
+</head>
 
-      <div class="header-actions">
-        <button
-          type="button"
-          class="user-btn"
-          id="userMenuBtn"
-          aria-expanded="false"
-        >
+<body>
+    <header class="site-header">
+        <a href="patient-home.html" class="brand">Medi<span>sync</span></a>
+        <nav class="nav">
+            <a href="patient-dashboard.html" class="nav-current">My appointments</a>
+            <a href="patient-request-appointment.html">Request appointment</a>
+        </nav>
+
+        <div class="header-actions">
+            <button type="button" class="user-btn" id="userMenuBtn" aria-expanded="false">
           <span class="avatar" id="userInitial">P</span>
           <span class="user-name" id="userName">Patient</span>
           <span class="chevron"></span>
         </button>
 
-        <ul class="user-menu" id="userMenu" hidden>
-          <li><a href="patient-home.html">Home</a></li>
-          <li><a href="patient-doctors.html">Doctors</a></li>
-          <li><a href="patient-profile-settings.html">My Profile</a></li>
-          <li><button type="button" id="logoutBtn">Log out</button></li>
-        </ul>
-      </div>
+            <ul class="user-menu" id="userMenu" hidden>
+                <li><a href="patient-home.html">Home</a></li>
+                <li><a href="patient-doctors.html">Doctors</a></li>
+                <li><a href="patient-profile-settings.html">My Profile</a></li>
+                <li><button type="button" id="logoutBtn">Log out</button></li>
+            </ul>
+        </div>
     </header>
 
     <main class="page">
-      <div class="page-head">
-        <div>
-          <h1>My appointments</h1>
-          <p>Track your requests and see your visit history.</p>
+        <div class="page-head">
+            <div>
+                <h1>My appointments</h1>
+                <p>Track your requests and see your visit history.</p>
+            </div>
         </div>
-      </div>
 
-      <!-- script: set text, remove [hidden]; add .success for green -->
-      <div id="dashMessage" class="page-message" hidden></div>
+        <!-- script: set text, remove [hidden]; add .success for green -->
+        <div id="dashMessage" class="page-message" hidden></div>
 
-      <section class="stats-row">
-        <div class="stat-card">
-          <span class="stat-number" id="statTotal">0</span>
-          <span class="stat-label">Total</span>
-        </div>
-        <div class="stat-card stat-card-primary">
-          <span class="stat-number" id="statUpcoming">0</span>
-          <span class="stat-label">Upcoming (confirmed)</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number" id="statPending">0</span>
-          <span class="stat-label">Pending</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number" id="statDone">0</span>
-          <span class="stat-label">Completed</span>
-        </div>
-      </section>
+        <section class="stats-row">
+            <div class="stat-card">
+                <span class="stat-number" id="statTotal">0</span>
+                <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-card stat-card-primary">
+                <span class="stat-number" id="statUpcoming">0</span>
+                <span class="stat-label">Upcoming (confirmed)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="statPending">0</span>
+                <span class="stat-label">Pending</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="statDone">0</span>
+                <span class="stat-label">Completed</span>
+            </div>
+        </section>
 
-      <section class="panel">
-        <div class="toolbar">
-          <h2 id="appointments-title">Appointment list</h2>
-          <div class="toolbar-controls">
-            <label for="apptFilter" class="visually-hidden"
-              >Filter by status</label
+        <section class="panel">
+            <div class="toolbar">
+                <h2 id="appointments-title">Appointment list</h2>
+                <div class="toolbar-controls">
+                    <label for="apptFilter" class="visually-hidden">Filter by status</label
             >
             <select id="apptFilter">
               <option value="">All statuses</option>
@@ -107,9 +100,39 @@
             </tbody>
           </table>
         </div>
-
-        <p class="table-phrase">Pending requests are reviewed by the clinic.</p>
       </section>
+      <!-- Patient's Appointment Details Modal -->
+    <div id="apptModal" class="modal" hidden>
+      <div class="modal-content" style="max-width: 450px; padding: 2rem; border-radius: 12px; text-align: left;">
+        <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem; color: var(--text-main, #1e293b);">Appointment Details</h2>
+        
+        <!-- Clean Grid Layout (Label on left, Value on right) -->
+        <div style="display: grid; grid-template-columns: 100px 1fr; gap: 1rem; margin-bottom: 1.5rem; font-size: 0.95rem;">
+          <span style="color: var(--muted, #64748b);">Ref ID</span>
+          <span id="modalApptId" style="font-family: monospace; font-weight: 600; color: var(--text-main, #1e293b);"></span>
+          
+          <span style="color: var(--muted, #64748b);">Doctor</span>
+          <strong id="modalApptDoctor" style="color: var(--text-main, #1e293b);"></strong>
+          
+          <span style="color: var(--muted, #64748b);">Service</span>
+          <span id="modalApptService" style="color: var(--text-main, #1e293b);"></span>
+          
+          <span style="color: var(--muted, #64748b);">Schedule</span>
+          <span id="modalApptDate" style="color: var(--text-main, #1e293b);"></span>
+          
+          <span style="color: var(--muted, #64748b);">Status</span>
+          <span id="modalApptStatusBadge"></span>
+
+          <span style="color: var(--muted, #64748b);">My Notes</span>
+          <span id="modalApptNotes" style="font-style: italic; color: var(--muted, #64748b);"></span>
+        </div>
+
+        <!-- Action Area (Cancel on left, Close on right) -->
+        <div id="modalApptActionArea" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border, #e2e8f0); display: flex; justify-content: space-between; align-items: center;">
+          <!-- Buttons injected by JS -->
+        </div>
+      </div>
+    </div>
     </main>
 
     <footer class="site-footer" id="contact">
@@ -128,8 +151,7 @@
         <p>(045) 000-0000<br />hello@medisync.example</p>
       </div>
     </footer>
-
+    <script src="api.js"></script>
     <script src="patient.js"></script>
-    <script src="script.js"></script>
   </body>
 </html>
