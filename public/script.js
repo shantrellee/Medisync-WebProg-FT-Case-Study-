@@ -176,3 +176,75 @@ document.addEventListener('DOMContentLoaded', () => {
         loadAppointments();
     }
 });
+
+async function deletePatient(patientId) {
+  // Retrieve the logged-in staff information
+  const currentStaff = JSON.parse(
+    sessionStorage.getItem('currentStaff') || '{}'
+  );
+
+
+  const adminStaffId = currentStaff.staffId;
+
+
+  if (!adminStaffId) {
+    alert('Authentication required. Staff ID missing. Please log in again.');
+    return;
+  }
+  const confirmDelete = confirm(
+    'Are you sure you want to permanently delete this patient and all their appointments?'
+  );
+
+  if (!confirmDelete) return;
+  try {
+    const response = await fetch(`/api/patients/${patientId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-staff-id': adminStaffId
+      },
+      body: JSON.stringify({ adminStaffId })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      alert(data.error || 'Failed to delete patient.');
+      return;
+    }
+    alert(data.message);
+    location.reload();
+  } catch (err) {
+    console.error('Failed to execute delete request:', err);
+    alert('An error occurred while connecting to the server.');
+  }
+}
+
+
+let selectedPatientId = null; // Track currently viewed patient
+
+function openPatientDetailsModal(patient) {
+  selectedPatientId = patient._id;
+
+  // Set edit link target
+  const editLink = document.getElementById('editPatientLink');
+  if (editLink) {
+    editLink.href = `staff-patient-form.html?id=${patient._id}`;
+  }
+
+  // Display the modal
+  const modal = document.getElementById('patientModal'); // adjust ID if different
+  if (modal) modal.style.display = 'block';
+}
+
+// Bind click listener once when DOM loads
+document.addEventListener('DOMContentLoaded', () => {
+  const deleteBtn = document.getElementById('deletePatientBtn');
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', () => {
+      if (!selectedPatientId) {
+        alert('No patient selected.');
+        return;
+      }
+      deletePatient(selectedPatientId);
+    });
+  }
+});

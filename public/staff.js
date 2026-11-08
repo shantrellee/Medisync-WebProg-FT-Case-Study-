@@ -409,38 +409,65 @@ document.addEventListener('DOMContentLoaded', () => {
         loadPatients();
     }
 
-    // ADD / EDIT PATIENT FORM (staff-patient-form.html)
+   // ADD / EDIT PATIENT FORM (staff-patient-form.html)
+(async () => {
     const patientForm = document.getElementById('patientForm');
+
     if (patientForm) {
         const editId = new URLSearchParams(window.location.search).get('id');
         const submitBtn = document.getElementById('patientSubmit');
 
+        // EDIT MODE
         if (editId) {
             document.title = 'Edit patient | Medisync Staff';
             document.getElementById('formTitle').textContent = 'Edit patient';
             submitBtn.textContent = 'Save changes';
 
-            // Pre-fill the form with the patient's current details
-            apiRequest('/patients').then(list => {
-                const p = list.find(x => (x._id === editId || x.id === editId));
+            // Disable button while loading patient details
+            submitBtn.disabled = true;
+
+            try {
+                // Retrieve existing patients
+                const list = await apiRequest('/patients');
+
+                // Find selected patient
+                const p = list.find(x =>
+                    x._id === editId || x.id === editId
+                );
+
                 if (!p) {
                     showMessage('staffMessage', 'Patient not found.');
-                    submitBtn.disabled = true;
                     return;
                 }
+
+                // Pre-fill form with existing details
                 patientForm.firstName.value = p.firstName || '';
                 patientForm.lastName.value = p.lastName || '';
-                patientForm.birthDate.value = p.birthDate ? new Date(p.birthDate).toISOString().split('T')[0] : '';
+
+                patientForm.birthDate.value = p.birthDate
+                    ? new Date(p.birthDate).toISOString().split('T')[0]
+                    : '';
+
                 patientForm.sex.value = p.sex || '';
                 patientForm.contact.value = p.phone || '';
                 patientForm.email.value = p.email || '';
                 patientForm.address.value = p.address || '';
-            }).catch(err => showMessage('staffMessage', err.message));
+
+            } catch (err) {
+                showMessage('staffMessage', err.message);
+                return;
+            }
+
+            // Enable button after loading
+            submitBtn.disabled = false;
         }
 
-        patientForm.addEventListener('submit', async(e) => {
+        // FORM SUBMISSION
+        patientForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
             submitBtn.disabled = true;
+
             try {
                 const payload = {
                     firstName: patientForm.firstName.value.trim(),
@@ -449,23 +476,50 @@ document.addEventListener('DOMContentLoaded', () => {
                     sex: patientForm.sex.value,
                     phone: patientForm.contact.value.trim(),
                     address: patientForm.address.value.trim(),
-                    email: patientForm.email ? patientForm.email.value.trim() : undefined
+                    email: patientForm.email.value.trim()
                 };
 
                 if (editId) {
-                    await apiRequest(`/patients/${editId}`, { method: 'PUT', body: JSON.stringify(payload) });
-                    showMessage('staffMessage', 'Patient updated!', true);
+                    // UPDATE EXISTING PATIENT
+                    await apiRequest(`/patients/${editId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(payload)
+                    });
+
+                    showMessage(
+                        'staffMessage',
+                        'Patient updated successfully!',
+                        true
+                    );
+
                 } else {
-                    await apiRequest('/patients', { method: 'POST', body: JSON.stringify(payload) });
-                    showMessage('staffMessage', 'Patient added successfully!', true);
+                    // ADD NEW PATIENT
+                    await apiRequest('/patients', {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+
+                    showMessage(
+                        'staffMessage',
+                        'Patient added successfully!',
+                        true
+                    );
                 }
-                setTimeout(() => window.location.href = 'staff-patients.html', 1500);
+
+                // Return to patient list
+                setTimeout(() => {
+                    window.location.href = 'staff-patients.html';
+                }, 1500);
+
             } catch (err) {
                 showMessage('staffMessage', err.message);
                 submitBtn.disabled = false;
             }
         });
     }
+})();
+
+
 
     // 8. ADD APPOINTMENT FORM (staff-appointment-form.html)
     const apptForm = document.getElementById('appointmentForm');

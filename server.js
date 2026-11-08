@@ -8,7 +8,6 @@ const fs = require('fs');
 
 console.log('Project directory:', __dirname);
 console.log('ENV file exists:', fs.existsSync(path.join(__dirname, '.env')));
-console.log('JWT_SECRET loaded:', !!process.env.JWT_SECRET);
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { requireAuth, requireRole } = require('./middleware/auth');
@@ -319,6 +318,113 @@ app.post('/api/patients', requireAuth, requireRole('staff'), async(req, res, nex
 });
 
 
+app.delete('/api/patients/:id', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Remove the patient
+    const deletedPatient = await Patient.findByIdAndDelete(id);
+
+    if (!deletedPatient) {
+      return res.status(404).json({
+        error: 'Patient not found or already deleted.'
+      });
+    }
+
+    // Remove all appointments associated with this patient
+    await Appointment.deleteMany({ patientId: id });
+
+    res.json({
+      message: "Patient ${deletedPatient.firstName} ${deletedPatient.lastName} and associated appointments were deleted successfully.",
+      patientId: id
+    });
+
+  } catch (error) {
+    console.error('Delete patient error:', error);
+
+    res.status(500).json({
+      error: 'Server error while deleting patient record.'
+    });
+  }
+});
+
+app.put('/api/patients/:id', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Only allow these patient fields to be updated
+    const allowedFields = [
+      'firstName',
+      'lastName',
+      'email',
+      'birthDate',
+      'sex',
+      'phone',
+      'address'
+    ];
+
+    const updates = {};
+
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    });
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        error: 'No valid fields provided for update.'
+      });
+    }
+
+    // Update the patient
+    const updatedPatient = await Patient.findByIdAndUpdate(
+      id,
+      { $set: updates },
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+
+    if (!updatedPatient) {
+      return res.status(404).json({
+        error: 'Patient not found.'
+      });
+    }
+
+    res.json({
+      message: 'Patient updated successfully.',
+      patient: updatedPatient
+    });
+
+  } catch (error) {
+    console.error('Update patient error:', error);
+
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        error: error.message
+      });
+    }
+
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        error: 'Invalid patient ID.'
+      });
+    }
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        error: 'Email is already being used by another patient.'
+      });
+    }
+
+    res.status(500).json({
+      error: 'Server error while updating patient record.'
+    });
+  }
+});
+
 // --- ERROR HANDLING ---
 
 app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
@@ -329,5 +435,7 @@ app.use((err, req, res, next) => {
         error: process.env.NODE_ENV === 'production' ? 'Server error' : err.message
     });
 });
+
+
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
