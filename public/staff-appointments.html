@@ -1,39 +1,42 @@
 <!doctype html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Appointments | Medisync Staff</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="patient.css" />
     <link rel="stylesheet" href="staff.css" />
-</head>
+  </head>
 
-<body class="staff-body" data-page="appointments">
+  <body class="staff-body" data-page="appointments">
     <div class="staff-layout">
-        <aside class="sidebar">
-            <a href="staff-dashboard.html" class="brand">Medi<span>sync</span></a>
-            <nav class="side-nav" aria-label="Staff">
-                <a href="staff-dashboard.html">Dashboard</a>
-                <a href="staff-patients.html">Patients</a>
-                <a href="staff-appointments.html" class="active">Appointments</a>
-            </nav>
-            <div class="side-foot">
-                <p>Signed in as staff</p>
-                <button type="button" id="logoutBtn" class="btn btn-outline btn-sm">
+      <aside class="sidebar">
+        <a href="staff-dashboard.html" class="brand">Medi<span>sync</span></a>
+        <nav class="side-nav" aria-label="Staff">
+          <a href="staff-dashboard.html">Dashboard</a>
+          <a href="staff-patients.html">Patients</a>
+          <a href="staff-appointments.html" class="active">Appointments</a>
+        </nav>
+        <div class="side-foot">
+          <p>Signed in as staff</p>
+          <button type="button" id="logoutBtn" class="btn btn-outline btn-sm">
             Log out
           </button>
-            </div>
-        </aside>
+        </div>
+      </aside>
 
-        <main class="staff-main">
-            <div class="staff-head">
-                <h1>Appointments</h1>
-                <a href="staff-appointment-form.html" class="btn btn-solid">+ New appointment</a
+      <main class="staff-main">
+        <div class="staff-head">
+          <h1>Appointments</h1>
+          <a href="staff-appointment-form.html" class="btn btn-solid"
+            >+ New appointment</a
           >
         </div>
 
@@ -96,7 +99,9 @@
                   <th>Service</th>
                   <th>Date and time</th>
                   <th>Status</th>
-                  <th class="col-actions">Actions</th>
+                  <th class="col-actions">
+                    <span class="visually-hidden">Actions</span>
+                  </th>
                 </tr>
               </thead>
               <tbody id="appointmentTableBody">
@@ -110,6 +115,62 @@
             </table>
           </div>
         </section>
+
+        <!-- Staff appointment details modal-->
+        <div id="staffApptModal" class="modal" hidden>
+          <div class="modal-content">
+            <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem">
+              Appointment details
+            </h2>
+
+            <div id="smError" class="page-message" role="alert" hidden></div>
+
+            <dl class="details">
+              <dt>Ref ID</dt>
+              <dd id="smId" style="font-family: monospace"></dd>
+
+              <dt>Patient</dt>
+              <dd id="smPatient"></dd>
+
+              <dt>Contact</dt>
+              <dd id="smContact"></dd>
+
+              <dt>Doctor</dt>
+              <dd id="smDoctor"></dd>
+
+              <dt>Service</dt>
+              <dd id="smService"></dd>
+
+              <dt>Schedule</dt>
+              <dd id="smDate"></dd>
+
+              <dt>Status</dt>
+              <dd id="smStatus"></dd>
+
+              <dt>Patient notes</dt>
+              <dd id="smNotes" style="font-style: italic"></dd>
+
+              <!-- Only shown for Rejected / Cancelled appointments that have a reason -->
+              <dt id="smReasonLabel" hidden>Reason</dt>
+              <dd id="smReason" hidden></dd>
+            </dl>
+
+            <!-- Only shown while the appointment is Pending or Confirmed -->
+            <div id="smReasonBox" class="modal-field" hidden>
+              <label for="smReasonInput"
+                >Reason (required to reject or cancel)</label
+              >
+              <textarea
+                id="smReasonInput"
+                rows="3"
+                maxlength="200"
+                placeholder="Tell the patient why"
+              ></textarea>
+            </div>
+
+            <div id="smActions" class="modal-actions"></div>
+          </div>
+        </div>
       </main>
     </div>
 

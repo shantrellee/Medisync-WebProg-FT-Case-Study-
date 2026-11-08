@@ -10,8 +10,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // 2. LOGOUT LOGIC
+    // 2. SIDEBAR: show who is signed in + LOGOUT LOGIC
     if (isProtected) {
+        // Uses the staff's name if the backend sends one, otherwise their staff ID (e.g. "Staff001")
+        const staffLabel = staffData.name ||
+            [staffData.firstName, staffData.lastName].filter(Boolean).join(' ') ||
+            staffData.staffId ||
+            'staff';
+        const signedInEl = document.querySelector('.side-foot p');
+        if (signedInEl) signedInEl.textContent = `Signed in as ${staffLabel}`;
+
         document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.clear();
             sessionStorage.clear();
@@ -104,11 +112,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const apptBody = document.getElementById('appointmentTableBody');
     if (apptBody) {
         let allAppointments = [];
+        let activeFilter = '';
+        let openApptId = null;
+
+        const applyFilter = () => {
+            renderAppointments(activeFilter ? allAppointments.filter(a => a.status === activeFilter) : allAppointments);
+        };
 
         const loadAppointments = async() => {
             try {
                 allAppointments = await apiRequest('/appointments');
-                renderAppointments(allAppointments);
+                applyFilter();
                 updatePendingCount(allAppointments);
             } catch (err) {
                 apptBody.innerHTML = '<tr><td colspan="6" class="empty">Error loading data.</td></tr>';
@@ -124,21 +138,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             appointmentsToRender.forEach(a => {
                 const tr = document.createElement('tr');
-                const isPending = a.status === 'Pending';
-                const isConfirmed = a.status === 'Confirmed';
-
-                let actions = '';
-                if (isPending) actions += `<button class="btn btn-outline btn-sm status-btn" data-id="${a._id}" data-status="Confirmed">Confirm</button> `;
-                if (isConfirmed) actions += `<button class="btn btn-solid btn-sm status-btn" data-id="${a._id}" data-status="Done">Done</button> `;
-                if (isPending || isConfirmed) actions += `<button class="btn btn-text btn-sm status-btn" data-id="${a._id}" data-status="Cancelled">Cancel</button>`;
-
                 tr.innerHTML = `
           <td>${escapeHTML(a.patientId?.firstName)} ${escapeHTML(a.patientId?.lastName)}<br><small>${escapeHTML(a.patientId?.phone)}</small></td>
           <td>${escapeHTML(a.doctor)}</td>
           <td>${escapeHTML(a.service)}</td>
           <td>${escapeHTML(a.date)} ${escapeHTML(a.time)}</td>
           <td><span class="badge badge-${a.status.toLowerCase()}">${escapeHTML(a.status)}</span></td>
-          <td>${actions || '-'}</td>
+          <td><button class="btn btn-outline btn-sm view-btn" data-id="${a._id}">View</button></td>
         `;
                 apptBody.appendChild(tr);
             });
@@ -161,29 +167,102 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.currentTarget.classList.add('active');
                 e.currentTarget.setAttribute('aria-pressed', 'true');
 
-                const filter = e.currentTarget.dataset.filter;
-                if (!filter) {
-                    renderAppointments(allAppointments);
-                } else {
-                    renderAppointments(allAppointments.filter(a => a.status === filter));
-                }
+                activeFilter = e.currentTarget.dataset.filter || '';
+                applyFilter();
             });
         });
 
-        // NEW EVENT DELEGATION (Replaces window.updateStatus):
-        apptBody.addEventListener('click', async(e) => {
-            if (e.target.classList.contains('status-btn')) {
-                const id = e.target.getAttribute('data-id');
-                const status = e.target.getAttribute('data-status');
+        // ----- Appointment details modal -----
+        const modal = document.getElementById('staffApptModal');
+        const errorBox = document.getElementById('smError');
+        const reasonBox = document.getElementById('smReasonBox');
+        const reasonInput = document.getElementById('smReasonInput');
 
-                if (!confirm(`Mark appointment as ${status}?`)) return;
+        const openModal = (a) => {
+            openApptId = a._id;
+            errorBox.hidden = true;
+            reasonInput.value = '';
 
-                try {
-                    await apiRequest(`/appointments/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
-                    loadAppointments();
-                } catch (err) {
-                    alert(err.message);
-                }
+            const patientName = `${a.patientId?.firstName || ''} ${a.patientId?.lastName || ''}`.trim() || 'Unknown patient';
+
+            document.getElementById('smId').textContent = String(a._id || '').slice(-8).toUpperCase();
+            document.getElementById('smPatient').textContent = patientName;
+            document.getElementById('smContact').textContent = a.patientId?.phone || 'N/A';
+            document.getElementById('smDoctor').textContent = a.doctor;
+            document.getElementById('smService').textContent = a.service;
+            document.getElementById('smDate').textContent = `${a.date} at ${a.time}`;
+            document.getElementById('smStatus').innerHTML = `<span class="badge badge-${a.status.toLowerCase()}">${escapeHTML(a.status)}</span>`;
+            document.getElementById('smNotes').textContent = a.notes ? `"${a.notes}"` : 'None provided';
+
+            // Details that depend on the status
+            const isClosedWithReason = a.status === 'Rejected' || a.status === 'Cancelled';
+            const savedReason = a.reason || (a.status === 'Rejected' ? 'No reason provided' : '');
+            document.getElementById('smReasonLabel').hidden = !(isClosedWithReason && savedReason);
+            const reasonText = document.getElementById('smReason');
+            reasonText.hidden = !(isClosedWithReason && savedReason);
+            reasonText.textContent = savedReason;
+
+            // Reason box is only for statuses staff can still act on
+            const canAct = a.status === 'Pending' || a.status === 'Confirmed';
+            reasonBox.hidden = !canAct;
+
+            let buttons = '';
+            if (a.status === 'Pending') {
+                buttons = `
+                    <button type="button" class="btn btn-solid btn-sm status-btn" data-status="Confirmed">Confirm</button>
+                    <button type="button" class="btn btn-danger btn-sm status-btn" data-status="Rejected">Reject</button>`;
+            } else if (a.status === 'Confirmed') {
+                buttons = `
+                    <button type="button" class="btn btn-solid btn-sm status-btn" data-status="Done">Mark as done</button>
+                    <button type="button" class="btn btn-danger btn-sm status-btn" data-status="Cancelled">Cancel appointment</button>`;
+            }
+
+            document.getElementById('smActions').innerHTML = `
+                <div class="modal-actions-left">${buttons}</div>
+                <button type="button" class="btn btn-outline" id="closeStaffModal">Close</button>`;
+
+            modal.hidden = false;
+        };
+
+        apptBody.addEventListener('click', (e) => {
+            const btn = e.target.closest('.view-btn');
+            if (!btn) return;
+            const a = allAppointments.find(x => x._id === btn.getAttribute('data-id'));
+            if (a) openModal(a);
+        });
+
+        modal.addEventListener('click', async(e) => {
+            // Close (button or click on the dark backdrop)
+            if (e.target.id === 'closeStaffModal' || e.target === modal) {
+                modal.hidden = true;
+                return;
+            }
+
+            const btn = e.target.closest('.status-btn');
+            if (!btn) return;
+
+            const status = btn.dataset.status;
+            const reason = reasonInput.value.trim();
+
+            // Rejecting or cancelling needs a reason so the patient knows why
+            if ((status === 'Rejected' || status === 'Cancelled') && !reason) {
+                errorBox.textContent = `Please enter a reason before you ${status === 'Rejected' ? 'reject this request' : 'cancel this appointment'}.`;
+                errorBox.hidden = false;
+                reasonInput.focus();
+                return;
+            }
+
+            btn.disabled = true;
+            try {
+                const body = reason ? { status, reason } : { status };
+                await apiRequest(`/appointments/${openApptId}/status`, { method: 'PATCH', body: JSON.stringify(body) });
+                modal.hidden = true;
+                showMessage('staffMessage', `Appointment marked as ${status}.`, true);
+                loadAppointments();
+            } catch (err) {
+                errorBox.textContent = err.message;
+                errorBox.hidden = false;
+                btn.disabled = false;
             }
         });
 
@@ -194,6 +273,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const patientBody = document.getElementById('patientTableBody');
     if (patientBody) {
         let allPatients = [];
+        let openPatientId = null;
+        let openPatientName = '';
 
         const loadPatients = async() => {
             try {
@@ -236,6 +317,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!patient) return;
 
                 const displayName = patient.firstName ? `${patient.firstName} ${patient.lastName}` : (patient.name || 'Unknown Patient');
+
+                // Remember who is open (used by Edit / Delete) and point Edit at the form
+                openPatientId = patient._id || patient.id;
+                openPatientName = displayName;
+                document.getElementById('editPatientLink').href = `staff-patient-form.html?id=${encodeURIComponent(openPatientId)}`;
 
                 // Populate new modal fields
                 document.getElementById('modalPatName').textContent = displayName;
@@ -287,6 +373,27 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // Delete patient
+        const deletePatientBtn = document.getElementById('deletePatientBtn');
+        if (deletePatientBtn) {
+            deletePatientBtn.addEventListener('click', async() => {
+                if (!openPatientId) return;
+                if (!confirm(`Delete ${openPatientName}? This cannot be undone.`)) return;
+
+                deletePatientBtn.disabled = true;
+                try {
+                    await apiRequest(`/patients/${openPatientId}`, { method: 'DELETE' });
+                    document.getElementById('patientModal').hidden = true;
+                    showMessage('staffMessage', `${openPatientName} was deleted.`, true);
+                    loadPatients();
+                } catch (err) {
+                    alert(err.message);
+                } finally {
+                    deletePatientBtn.disabled = false;
+                }
+            });
+        }
+
         // Quick frontend search
         const searchInput = document.getElementById('patientSearch');
         if (searchInput) {
@@ -302,12 +409,38 @@ document.addEventListener('DOMContentLoaded', () => {
         loadPatients();
     }
 
-    // 7. ADD PATIENT FORM (staff-patient-form.html)
+    // ADD / EDIT PATIENT FORM (staff-patient-form.html)
     const patientForm = document.getElementById('patientForm');
     if (patientForm) {
+        const editId = new URLSearchParams(window.location.search).get('id');
+        const submitBtn = document.getElementById('patientSubmit');
+
+        if (editId) {
+            document.title = 'Edit patient | Medisync Staff';
+            document.getElementById('formTitle').textContent = 'Edit patient';
+            submitBtn.textContent = 'Save changes';
+
+            // Pre-fill the form with the patient's current details
+            apiRequest('/patients').then(list => {
+                const p = list.find(x => (x._id === editId || x.id === editId));
+                if (!p) {
+                    showMessage('staffMessage', 'Patient not found.');
+                    submitBtn.disabled = true;
+                    return;
+                }
+                patientForm.firstName.value = p.firstName || '';
+                patientForm.lastName.value = p.lastName || '';
+                patientForm.birthDate.value = p.birthDate ? new Date(p.birthDate).toISOString().split('T')[0] : '';
+                patientForm.sex.value = p.sex || '';
+                patientForm.contact.value = p.phone || '';
+                patientForm.email.value = p.email || '';
+                patientForm.address.value = p.address || '';
+            }).catch(err => showMessage('staffMessage', err.message));
+        }
+
         patientForm.addEventListener('submit', async(e) => {
             e.preventDefault();
-            document.querySelector('button[type="submit"]').disabled = true;
+            submitBtn.disabled = true;
             try {
                 const payload = {
                     firstName: patientForm.firstName.value.trim(),
@@ -319,12 +452,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     email: patientForm.email ? patientForm.email.value.trim() : undefined
                 };
 
-                await apiRequest('/patients', { method: 'POST', body: JSON.stringify(payload) });
-                showMessage('staffMessage', 'Patient added successfully!', true);
+                if (editId) {
+                    await apiRequest(`/patients/${editId}`, { method: 'PUT', body: JSON.stringify(payload) });
+                    showMessage('staffMessage', 'Patient updated!', true);
+                } else {
+                    await apiRequest('/patients', { method: 'POST', body: JSON.stringify(payload) });
+                    showMessage('staffMessage', 'Patient added successfully!', true);
+                }
                 setTimeout(() => window.location.href = 'staff-patients.html', 1500);
             } catch (err) {
                 showMessage('staffMessage', err.message);
-                document.querySelector('button[type="submit"]').disabled = false;
+                submitBtn.disabled = false;
             }
         });
     }
@@ -335,6 +473,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const patientSelect = document.getElementById('appointmentPatient');
         const doctorSelect = document.getElementById('appointmentDoctor');
         const serviceSelect = document.getElementById('appointmentService');
+        const dateInput = document.getElementById('appointmentDate');
+        const timeSelect = document.getElementById('appointmentTime');
+
+        // No past dates, and only real time slots
+        dateInput.min = todayLocal();
+        populateTimeSlots(timeSelect, dateInput.value);
+        dateInput.addEventListener('change', () => populateTimeSlots(timeSelect, dateInput.value));
 
         // Load Patients and Doctors dropdowns
         Promise.all([apiRequest('/patients'), apiRequest('/clinic/catalog')])
@@ -359,7 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         doctorSelect.addEventListener('change', () => {
             serviceSelect.innerHTML = '<option value="">Select a service</option>';
-            const match = window.clinicCatalog.find(c => c.doctor === doctorSelect.value);
+            const match = (window.clinicCatalog || []).find(c => c.doctor === doctorSelect.value);
             if (match) {
                 match.services.forEach(s => {
                     const opt = document.createElement('option');
@@ -375,6 +520,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         apptForm.addEventListener('submit', async(e) => {
             e.preventDefault();
+
+            if (apptForm.date.value < todayLocal()) {
+                showMessage('staffMessage', 'Please choose today or a future date.');
+                return;
+            }
+            if (isSunday(apptForm.date.value)) {
+                showMessage('staffMessage', 'The clinic is closed on Sundays. Please choose Monday to Saturday.');
+                return;
+            }
+
             document.querySelector('button[type="submit"]').disabled = true;
             try {
                 const payload = {

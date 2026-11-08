@@ -558,3 +558,224 @@ dialog::backdrop {
     max-height: 90vh;
     overflow-y: auto;
 }
+
+/* ---------- //Home: appointment reminder card ---------- */
+
+.hero h1 {
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+}
+
+.reminder-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    max-width: 900px;
+    margin-top: 24px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 6px solid var(--primary);
+    border-radius: var(--radius);
+}
+
+.reminder-card[hidden] {
+    display: none;
+}
+
+.reminder-card .btn {
+    flex: none;
+    white-space: nowrap;
+}
+
+.reminder-text h2 {
+    font-size: 1.15rem;
+    margin-bottom: 4px;
+}
+
+.reminder-text p {
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+    .reminder-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+
+/* ---------- //Doctors page: cards ---------- */
+
+.doctor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.doctor-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+}
+
+.doctor-photo {
+    display: grid;
+    place-items: center;
+    width: 88px;
+    height: 88px;
+    overflow: hidden;
+    border-radius: 50%;
+    background: var(--secondary);
+    color: var(--primary);
+    font-size: 1.6rem;
+    font-weight: 800;
+}
+
+.doctor-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.doctor-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    flex: 1;
+}
+
+.doctor-info h2 {
+    font-size: 1.2rem;
+}
+
+.doctor-info h3 {
+    margin-top: 4px;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.doctor-specialty {
+    padding: 3px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary);
+    background: var(--secondary);
+    border-radius: 999px;
+}
+
+.doctor-about,
+.doctor-edu {
+    font-size: 0.92rem;
+    color: var(--muted);
+}
+
+.chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    padding: 5px 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+}
+
+a.chip:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.doctor-cta {
+    margin-top: auto;
+}
+
+
+/* ---------- //Request appointment: side filter layout ---------- */
+
+.page-wide {
+    max-width: 1000px;
+}
+
+.request-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.field-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.table-phrase {
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+@media (max-width: 800px) {
+    .request-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ---------- //Modal extras (reason box + action row) ---------- */
+
+.modal-field {
+    margin-top: 20px;
+}
+
+.modal-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.modal-content textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font: inherit;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    resize: vertical;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+}
+
+.modal-actions-left {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.modal-content .page-message {
+    margin-bottom: 16px;
+}
