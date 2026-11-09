@@ -256,6 +256,132 @@ app.patch('/api/appointments/:id/cancel-self', requireAuth, requireRole('patient
     } catch (error) { next(error); }
 });
 
+// GET /api/patients/:id - Retrieve profile information of the logged-in patient
+app.get('/api/patients/:id', requireAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Patients can only view their own profile
+        if (req.user.role === 'patient' && req.user.id !== id) {
+            return res.status(403).json({
+                error: 'You can only view your own profile.'
+            });
+        }
+
+        if (!['patient', 'staff', 'admin'].includes(req.user.role)) {
+            return res.status(403).json({
+                error: 'You do not have permission to view this patient.'
+            });
+        }
+
+        const patient = await Patient.findById(id).select('-password');
+
+        if (!patient) {
+            return res.status(404).json({
+                error: 'Patient not found.'
+            });
+        }
+
+        res.json(patient);
+
+    } catch (error) {
+        console.error('Fetch patient profile error:', error);
+
+        if (error.name === 'CastError') {
+            return res.status(400).json({
+                error: 'Invalid patient ID.'
+            });
+        }
+
+        res.status(500).json({
+            error: 'Failed to retrieve profile information.'
+        });
+    }
+});
+
+// PUT /api/patients/change-password
+app.put('/api/patients/change-password', requireAuth, async (req, res) => {
+    try {
+        // Only patients can use this endpoint
+        if (req.user.role !== 'patient') {
+            return res.status(403).json({
+                error: 'Only patients can change their password.'
+            });
+        }
+
+        const { currentPassword, newPassword } = req.body;
+
+        // Check required fields
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({
+                error: 'Please provide your current and new passwords.'
+            });
+        }
+
+        // Validate new password
+        if (newPassword.length < 8) {
+            return res.status(400).json({
+                error: 'New password must be at least 8 characters long.'
+            });
+        }
+
+        // Find the logged-in patient
+        const patient = await Patient.findById(req.user.id).select('+password');
+
+        if (!patient) {
+            return res.status(404).json({
+                error: 'Patient not found.'
+            });
+        }
+
+        // Verify current password
+        const isPasswordCorrect = await bcrypt.compare(
+            currentPassword,
+            patient.password
+        );
+
+        if (!isPasswordCorrect) {
+            return res.status(400).json({
+                error: 'Current password is incorrect.'
+            });
+        }
+
+        // Prevent reusing the same password
+        const isSamePassword = await bcrypt.compare(
+            newPassword,
+            patient.password
+        );
+
+        if (isSamePassword) {
+            return res.status(400).json({
+                error: 'Your new password must be different from your current password.'
+            });
+        }
+
+        // Hash and save the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await Patient.updateOne(
+            { _id: patient._id },
+            { $set: { password: hashedPassword } }
+        );
+
+        console.log('Patient password changed:', patient._id);
+
+        return res.json({
+            message: 'Password changed successfully.'
+        });
+
+    } catch (error) {
+        console.error('Change password error:', error);
+
+        return res.status(500).json({
+            error: 'Server error while changing password.'
+        });
+    }
+});
+
+
 
 // --- STAFF-ONLY ROUTES ---
 
@@ -363,9 +489,28 @@ app.delete('/api/patients/:id', requireAuth, async(req, res) => {
     }
 });
 
-app.put('/api/patients/:id', requireAuth, async(req, res) => {
+
+// PUT /api/patients/:id - Update patient information
+app.put('/api/patients/:id', requireAuth, async (req, res) => {
     try {
         const { id } = req.params;
+
+        // Patients can only update their own profile
+        if (
+            req.user.role === 'patient' &&
+            req.user.id !== id
+        ) {
+            return res.status(403).json({
+                error: 'You can only update your own profile.'
+            });
+        }
+
+        // Only patients, staff, and admins are allowed
+        if (!['patient', 'staff', 'admin'].includes(req.user.role)) {
+            return res.status(403).json({
+                error: 'You do not have permission to update patient records.'
+            });
+        }
 
         // Only allow these patient fields to be updated
         const allowedFields = [
@@ -392,14 +537,18 @@ app.put('/api/patients/:id', requireAuth, async(req, res) => {
             });
         }
 
-        // Update the patient
+        // Update patient in MongoDB
         const updatedPatient = await Patient.findByIdAndUpdate(
-            id, { $set: updates }, {
+            id,
+            { $set: updates },
+            {
                 new: true,
                 runValidators: true
             }
-        );
-
+        ).select('-password');
+        console.log('Patient ID:', id);
+        console.log('Fields received:', updates);
+        console.log('Updated patient from MongoDB:', updatedPatient);
         if (!updatedPatient) {
             return res.status(404).json({
                 error: 'Patient not found.'
@@ -437,6 +586,8 @@ app.put('/api/patients/:id', requireAuth, async(req, res) => {
         });
     }
 });
+
+
 
 // --- ERROR HANDLING ---
 

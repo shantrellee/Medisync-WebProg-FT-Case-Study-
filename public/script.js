@@ -175,6 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         loadAppointments();
     }
+    
 });
 
 async function deletePatient(patientId) {
@@ -248,3 +249,212 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('My Profile JavaScript is running!');
+    const profileForm = document.getElementById('profileForm');
+
+    if (!profileForm) return;
+
+    // Get logged-in patient information from localStorage
+    const rawCurrentPatient = localStorage.getItem('currentPatient');
+
+    if (!rawCurrentPatient) {
+        alert('Please log in first to view your profile.');
+        window.location.href = 'patient-login.html';
+        return;
+    }
+
+    let patientData;
+
+    try {
+        patientData = JSON.parse(rawCurrentPatient);
+    } catch (err) {
+        console.error('Invalid currentPatient data in localStorage:', err);
+        alert('Unable to read your login information. Please log in again.');
+        return;
+    }
+
+    // Check possible ID property names
+    const patientId =
+        patientData.id ||
+        patientData._id ||
+        patientData.patientId;
+
+    console.log('Stored patient data:', patientData);
+    console.log('Patient ID:', patientId);
+
+    if (!patientId) {
+        console.error('Patient ID is missing from localStorage.');
+        alert('Patient ID not found. Please log in again.');
+        return;
+    }
+
+    // Helper function for filling form fields
+    const setVal = (id, value) => {
+        const element = document.getElementById(id);
+
+        if (element) {
+            element.value = value ?? '';
+        } else {
+            console.error(`Element with ID "${id}" not found.`);
+        }
+    };
+
+    // LOAD PATIENT PROFILE
+    try {
+    const response = await fetch(`/api/patients/${patientId}`, {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to retrieve patient profile.');
+    }
+
+    const patient = await response.json();
+
+    console.log('Patient information retrieved:', patient);
+
+    setVal('profileFirstName', patient.firstName);
+    setVal('profileLastName', patient.lastName);
+    setVal('profileBirthDate', patient.birthDate);
+    setVal('profileSex', patient.sex);
+    setVal('profileEmail', patient.email);
+    setVal('profileContact', patient.phone);
+
+} catch (err) {
+    console.error('Error auto-filling profile:', err);
+    alert(err.message);
+}
+
+    // SAVE PROFILE CHANGES
+    profileForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const rawContact = document.getElementById('profileContact').value.trim();
+        const cleanedPhone = rawContact.replace(/[\s-]/g, '');
+
+        const payload = {
+            firstName: document.getElementById('profileFirstName').value.trim(),
+            lastName: document.getElementById('profileLastName').value.trim(),
+            birthDate: document.getElementById('profileBirthDate').value,
+            sex: document.getElementById('profileSex').value,
+            email: document.getElementById('profileEmail').value.trim(),
+            phone: cleanedPhone
+        };
+
+        try {
+            const token = localStorage.getItem('token');
+
+            const updateRes = await fetch(`/api/patients/${patientId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify(payload)
+            });
+            console.log('Update response status:', updateRes.status);
+
+            const result = await updateRes.json();
+            console.log('Update response:', result);
+            if (!updateRes.ok) {
+                alert(result.error || 'Failed to update profile.');
+                return;
+            }
+
+            // Update locally stored patient information
+            localStorage.setItem('currentPatient', JSON.stringify({
+                ...patientData,
+                id: patientId,
+                firstName: payload.firstName,
+                lastName: payload.lastName
+            }));
+
+            alert('Profile updated successfully!');
+
+        } catch (err) {
+            console.error('Error saving profile changes:', err);
+            alert('Network error while saving changes.');
+        }
+    });
+});
+
+// CHANGE PASSWORD FORM
+const passwordForm = document.getElementById('passwordForm');
+
+if (passwordForm) {
+    console.log('Password form detected.');
+
+    passwordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        console.log('Change password form submitted.');
+
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        const message = document.getElementById('passwordMessage');
+        const submitButton = passwordForm.querySelector('button[type="submit"]');
+
+        if (newPassword.length < 6) {
+            message.textContent = 'New password must be at least 6 characters.';
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            message.textContent = 'New passwords do not match.';
+            return;
+        }
+
+        try {
+            submitButton.disabled = true;
+            message.textContent = 'Updating password...';
+
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                throw new Error('Please log in again.');
+            }
+
+            const response = await fetch('/api/patients/change-password', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    currentPassword,
+                    newPassword
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to change password.');
+            }
+
+           alert('Password updated successfully!');
+
+                passwordForm.reset();
+                message.textContent = '';
+        } catch (error) {
+            console.error('Change password error:', error);
+            message.textContent = error.message;
+
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+
+} else {
+    console.log('Password form not found.');
+}
+
+
+
