@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         info.innerHTML = `
                     <h2>${escapeHTML(d.name)}</h2>
                     <span class="doctor-specialty">${escapeHTML(d.specialty)}</span>
-                    <p class="doctor-about">${escapeHTML(d.description) || 'Description coming soon.'}</p>
+                    <p class="doctor-about">${escapeHTML(d.description) || ' '}</p>
                     ${d.education ? `<p class="doctor-edu"><strong>Education:</strong> ${escapeHTML(d.education)}</p>` : ''}
                     <h3>Services</h3>
                     <div class="chip-list">${serviceLinks || '<span class="row-note">No services listed.</span>'}</div>
