@@ -1,183 +1,189 @@
 const patientData = JSON.parse(sessionStorage.getItem('currentPatient') || localStorage.getItem('currentPatient') || '{}');
 document.addEventListener('DOMContentLoaded', () => {
-    const userRole = localStorage.getItem('role');
-    const token = localStorage.getItem('token');
-    const patientData = JSON.parse(sessionStorage.getItem('currentPatient') || localStorage.getItem('currentPatient') || '{}');
-    const displayName = patientData.firstName || patientData.name || 'Patient';
- 
-    // 1. PAGE GUARD: Redirect to login if accessing a protected page without a token
-    const isProtected = document.querySelector('.user-btn') !== null;
-    if (isProtected && (!token || userRole !== 'patient')) {
-        window.location.href = 'patient-login.html';
-        return;
-    }
- 
-    // 2. HEADER LOGIC: Set name and handle logout (Crash-proofed for older accounts)
-    if (isProtected) {
-        const userNameEl = document.getElementById('userName');
-        if (userNameEl) userNameEl.textContent = displayName;
- 
-        const userInitialEl = document.getElementById('userInitial');
-        if (userInitialEl) userInitialEl.textContent = displayName.charAt(0).toUpperCase();
- 
-        const userMenuBtn = document.getElementById('userMenuBtn');
-        if (userMenuBtn) {
-            userMenuBtn.addEventListener('click', (e) => {
-                const menu = document.getElementById('userMenu');
-                if (menu) {
-                    const isExpanded = menu.hidden === false;
-                    menu.hidden = isExpanded;
-                    e.currentTarget.setAttribute('aria-expanded', !isExpanded);
-                }
-            });
-        }
- 
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-                localStorage.clear();
-                sessionStorage.clear();
-                window.location.href = 'patient-login.html';
-            });
-        }
-    }
+            const userRole = localStorage.getItem('role');
+            const token = localStorage.getItem('token');
+            const patientData = JSON.parse(sessionStorage.getItem('currentPatient') || localStorage.getItem('currentPatient') || '{}');
+            const displayName = patientData.firstName || patientData.name || 'Patient';
 
-    // Helper to show messages
-    const showMessage = (elId, msg, isSuccess = false) => {
-        const el = document.getElementById(elId);
-        if (!el) return;
-        el.textContent = msg;
-        el.hidden = false;
-        el.className = `page-message ${isSuccess ? 'success' : ''}`;
-    };
- 
-    // 3. LOGIN FORM
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', async(e) => {
-            e.preventDefault();
-            document.querySelector('button[type="submit"]').disabled = true;
-            try {
-                const payload = {
-                    email: loginForm.email.value.trim(),
-                    password: loginForm.password.value
-                };
-                const data = await apiRequest('/auth/patient/login', { method: 'POST', body: JSON.stringify(payload) });
- 
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('role', 'patient');
-                sessionStorage.setItem('currentPatient', JSON.stringify(data.patient));
-                localStorage.setItem('currentPatient', JSON.stringify(data.patient));
-                window.location.href = 'patient-home.html';
-            } catch (err) {
-                showMessage('loginMessage', err.message);
-                document.querySelector('button[type="submit"]').disabled = false;
-            }
-        });
-    }
- 
-    // 4. REGISTER FORM
-    const registerForm = document.getElementById('registerForm');
-    if (registerForm) {
-        registerForm.addEventListener('submit', async(e) => {
-            e.preventDefault();
-            document.querySelector('button[type="submit"]').disabled = true;
-            try {
-                const payload = {
-                    firstName: registerForm.firstName.value.trim(),
-                    lastName: registerForm.lastName.value.trim(),
-                    birthDate: registerForm.birthDate.value,
-                    sex: registerForm.sex.value,
-                    email: registerForm.email.value.trim(),
-                    phone: registerForm.contact.value.trim(),
-                    password: registerForm.password.value
-                };
- 
-                await apiRequest('/auth/patient/register', { method: 'POST', body: JSON.stringify(payload) });
-                showMessage('registerMessage', 'Account created! Redirecting to login...', true);
-                setTimeout(() => window.location.href = 'patient-login.html', 1500);
-            } catch (err) {
-                showMessage('registerMessage', err.message);
-                document.querySelector('button[type="submit"]').disabled = false;
-            }
-        });
-    }
- 
-    // HOME page patientr: greeting + appointment reminder (patient-home.html)
-    const greetingEl = document.getElementById('greeting');
-    if (greetingEl) {
-        greetingEl.textContent = `Hello, ${displayName}!`;
-    }
- 
-    const reminderCard = document.getElementById('reminderCard');
-    if (reminderCard) {
-        const loadReminder = async() => {
-            try {
-                const appts = await apiRequest('/patients/me/appointments');
-                const today = todayLocal();
- 
-                // Confirmed appointments from today onward, soonest first
-                const upcoming = appts
-                    .filter(a => a.status === 'Confirmed' && a.date >= today)
-                    .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
-                const next = upcoming[0];
- 
-                const titleEl = document.getElementById('reminderTitle');
-                const detailsEl = document.getElementById('reminderDetails');
- 
-                if (!next) {
-                    titleEl.textContent = 'You have no upcoming appointments.';
-                    detailsEl.textContent = 'Request one and the clinic will confirm your schedule.';
-                } else if (next.date === today) {
-                    titleEl.textContent = `You have an appointment at ${formatTime12(next.time)} today.`;
-                    detailsEl.textContent = `${next.service} with ${next.doctor}`;
-                } else {
-                    const niceDate = new Date(`${next.date}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                    titleEl.textContent = `Your next appointment is on ${niceDate} at ${formatTime12(next.time)}.`;
-                    detailsEl.textContent = `${next.service} with ${next.doctor}`;
-                }
-                reminderCard.hidden = false;
-            } catch (err) {
-                reminderCard.hidden = true; // fail quietly, the greeting and button still work
-            }
-        };
-        loadReminder();
-    }
- 
-    // DOCTORS PAGE (patient-doctors.html)
-    const doctorGrid = document.getElementById('doctorGrid');
-    if (doctorGrid) {
-        apiRequest('/clinic/catalog').then(data => {
-            doctorGrid.innerHTML = '';
-            if (!data.length) {
-                doctorGrid.innerHTML = '<p class="row-note">No doctors available yet.</p>';
+            // 1. PAGE GUARD: Redirect to login if accessing a protected page without a token
+            const isProtected = document.querySelector('.user-btn') !== null;
+            if (isProtected && (!token || userRole !== 'patient')) {
+                window.location.href = 'patient-login.html';
                 return;
             }
- 
-            data.map(getDoctorInfo).forEach(d => {
-                const card = document.createElement('article');
-                card.className = 'doctor-card';
- 
-                // Photo (initials ng name if doctor has no photo yet)
-                const photo = document.createElement('div');
-                photo.className = 'doctor-photo';
-                if (d.photo) {
-                    const img = document.createElement('img');
-                    img.src = d.photo;
-                    img.alt = `Photo of ${d.name}`;
-                    photo.appendChild(img);
-                } else {
-                    const initials = d.name.replace(/^Dr\.?\s*/i, '').split(' ').map(w => w.charAt(0)).slice(0, 2).join('').toUpperCase();
-                    photo.textContent = initials || 'Dr';
+
+            // 2. HEADER LOGIC: Set name and handle logout (Crash-proofed for older accounts)
+            if (isProtected) {
+                const userNameEl = document.getElementById('userName');
+                if (userNameEl) userNameEl.textContent = displayName;
+
+                const userInitialEl = document.getElementById('userInitial');
+                if (userInitialEl) userInitialEl.textContent = displayName.charAt(0).toUpperCase();
+
+                const userMenuBtn = document.getElementById('userMenuBtn');
+                if (userMenuBtn) {
+                    userMenuBtn.addEventListener('click', (e) => {
+                        const menu = document.getElementById('userMenu');
+                        if (menu) {
+                            const isExpanded = menu.hidden === false;
+                            menu.hidden = isExpanded;
+                            e.currentTarget.setAttribute('aria-expanded', !isExpanded);
+                        }
+                    });
                 }
- 
-                const serviceLinks = d.services.map(s =>
-                    `<a class="chip" href="patient-request-appointment.html?doctor=${encodeURIComponent(d.key)}&service=${encodeURIComponent(s)}">${escapeHTML(s)}</a>`
-                ).join('');
- 
-                const info = document.createElement('div');
-                info.className = 'doctor-info';
-                info.innerHTML = `
+
+                const logoutBtn = document.getElementById('logoutBtn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => {
+                        localStorage.clear();
+                        sessionStorage.clear();
+                        window.location.href = 'patient-login.html';
+                    });
+                }
+            }
+
+            // Helper to show messages
+            const showMessage = (elId, msg, isSuccess = false) => {
+                const el = document.getElementById(elId);
+                if (!el) return;
+                el.textContent = msg;
+                el.hidden = false;
+                el.className = `page-message ${isSuccess ? 'success' : ''}`;
+            };
+
+            // 3. LOGIN FORM
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async(e) => {
+                    e.preventDefault();
+                    document.querySelector('button[type="submit"]').disabled = true;
+                    try {
+                        const payload = {
+                            email: loginForm.email.value.trim(),
+                            password: loginForm.password.value
+                        };
+                        const data = await apiRequest('/auth/patient/login', { method: 'POST', body: JSON.stringify(payload) });
+
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('role', 'patient');
+                        sessionStorage.setItem('currentPatient', JSON.stringify(data.patient));
+                        localStorage.setItem('currentPatient', JSON.stringify(data.patient));
+                        window.location.href = 'patient-home.html';
+                    } catch (err) {
+                        showMessage('loginMessage', err.message);
+                        document.querySelector('button[type="submit"]').disabled = false;
+                    }
+                });
+            }
+
+            // 4. REGISTER FORM
+            // Restrict birthdate inputs to today or past dates
+            const birthDateInputs = document.querySelectorAll('input[name="birthDate"], #birthDate');
+            if (birthDateInputs.length > 0) {
+                const today = new Date().toLocaleDateString('en-CA');
+                birthDateInputs.forEach(input => input.setAttribute('max', today));
+            }
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', async(e) => {
+                    e.preventDefault();
+                    document.querySelector('button[type="submit"]').disabled = true;
+                    try {
+                        const payload = {
+                            firstName: registerForm.firstName.value.trim(),
+                            lastName: registerForm.lastName.value.trim(),
+                            birthDate: registerForm.birthDate.value,
+                            sex: registerForm.sex.value,
+                            email: registerForm.email.value.trim(),
+                            phone: registerForm.contact.value.replace(/[\s-]/g, ''),
+                            password: registerForm.password.value
+                        };
+
+                        await apiRequest('/auth/patient/register', { method: 'POST', body: JSON.stringify(payload) });
+                        showMessage('registerMessage', 'Account created! Redirecting to login...', true);
+                        setTimeout(() => window.location.href = 'patient-login.html', 1500);
+                    } catch (err) {
+                        showMessage('registerMessage', err.message);
+                        document.querySelector('button[type="submit"]').disabled = false;
+                    }
+                });
+            }
+
+            // HOME page patientr: greeting + appointment reminder (patient-home.html)
+            const greetingEl = document.getElementById('greeting');
+            if (greetingEl) {
+                greetingEl.textContent = `Hello, ${displayName}!`;
+            }
+
+            const reminderCard = document.getElementById('reminderCard');
+            if (reminderCard) {
+                const loadReminder = async() => {
+                    try {
+                        const appts = await apiRequest('/patients/me/appointments');
+                        const today = todayLocal();
+
+                        // Confirmed appointments from today onward, soonest first
+                        const upcoming = appts
+                            .filter(a => a.status === 'Confirmed' && a.date >= today)
+                            .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+                        const next = upcoming[0];
+
+                        const titleEl = document.getElementById('reminderTitle');
+                        const detailsEl = document.getElementById('reminderDetails');
+
+                        if (!next) {
+                            titleEl.textContent = 'You have no upcoming appointments.';
+                            detailsEl.textContent = 'Request one and the clinic will confirm your schedule.';
+                        } else if (next.date === today) {
+                            titleEl.textContent = `You have an appointment at ${formatTime12(next.time)} today.`;
+                            detailsEl.textContent = `${next.service} with ${next.doctor}`;
+                        } else {
+                            const niceDate = new Date(`${next.date}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                            titleEl.textContent = `Your next appointment is on ${niceDate} at ${formatTime12(next.time)}.`;
+                            detailsEl.textContent = `${next.service} with ${next.doctor}`;
+                        }
+                        reminderCard.hidden = false;
+                    } catch (err) {
+                        reminderCard.hidden = true; // fail quietly, the greeting and button still work
+                    }
+                };
+                loadReminder();
+            }
+
+            // DOCTORS PAGE (patient-doctors.html)
+            const doctorGrid = document.getElementById('doctorGrid');
+            if (doctorGrid) {
+                apiRequest('/clinic/catalog').then(data => {
+                            doctorGrid.innerHTML = '';
+                            if (!data.length) {
+                                doctorGrid.innerHTML = '<p class="row-note">No doctors available yet.</p>';
+                                return;
+                            }
+
+                            data.map(getDoctorInfo).forEach(d => {
+                                        const card = document.createElement('article');
+                                        card.className = 'doctor-card';
+
+                                        // Photo (initials ng name if doctor has no photo yet)
+                                        const photo = document.createElement('div');
+                                        photo.className = 'doctor-photo';
+                                        if (d.photo) {
+                                            const img = document.createElement('img');
+                                            img.src = d.photo;
+                                            img.alt = `Photo of ${d.name}`;
+                                            photo.appendChild(img);
+                                        } else {
+                                            const initials = d.name.replace(/^Dr\.?\s*/i, '').split(' ').map(w => w.charAt(0)).slice(0, 2).join('').toUpperCase();
+                                            photo.textContent = initials || 'Dr';
+                                        }
+
+                                        const serviceLinks = d.services.map(s =>
+                                            `<a class="chip" href="patient-request-appointment.html?doctor=${encodeURIComponent(d.key)}&service=${encodeURIComponent(s)}">${escapeHTML(s)}</a>`
+                                        ).join('');
+
+                                        const info = document.createElement('div');
+                                        info.className = 'doctor-info';
+                                        info.innerHTML = `
                     <h2>${escapeHTML(d.name)}</h2>
                     <span class="doctor-specialty">${escapeHTML(d.specialty)}</span>
                     <p class="doctor-about">${escapeHTML(d.description) || 'Description coming soon.'}</p>
@@ -396,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('modalApptNotes').textContent = a.notes ? `"${a.notes}"` : 'None provided';
  
                 // Reason (shown when the clinic rejected or cancelled and left a reason)
-                const reasonText = a.reason || (a.status === 'Rejected' ? 'No reason provided' : '');
+                const reasonText = a.remarks || (a.status === 'Cancelled' ? 'No reason provided for cancellation.' : '');
                 document.getElementById('modalReasonLabel').hidden = !reasonText;
                 const reasonEl = document.getElementById('modalApptReason');
                 reasonEl.hidden = !reasonText;
@@ -451,4 +457,3 @@ document.addEventListener('DOMContentLoaded', () => {
         loadDashboard();
     }
 });
- 

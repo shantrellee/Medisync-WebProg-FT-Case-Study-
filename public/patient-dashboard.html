@@ -1,56 +1,47 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>My appointments | Medisync</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="patient.css" />
-  </head>
+</head>
 
-  <body>
+<body>
     <header class="site-header">
-      <a href="patient-home.html" class="brand">Medi<span>sync</span></a>
-      <div class="header-actions">
-        <button
-          type="button"
-          class="user-btn"
-          id="userMenuBtn"
-          aria-expanded="false"
-        >
+        <a href="patient-home.html" class="brand">Medi<span>sync</span></a>
+        <div class="header-actions">
+            <button type="button" class="user-btn" id="userMenuBtn" aria-expanded="false">
           <span class="avatar" id="userInitial">P</span>
           <span class="user-name" id="userName">Patient</span>
           <span class="chevron"></span>
         </button>
 
-        <ul class="user-menu" id="userMenu" hidden>
-          <li><a href="patient-home.html">Home</a></li>
-          <li>
-            <a href="patient-dashboard.html" aria-current="page"
-              >My appointments</a
+            <ul class="user-menu" id="userMenu" hidden>
+                <li><a href="patient-home.html">Home</a></li>
+                <li>
+                    <a href="patient-dashboard.html" aria-current="page">My appointments</a
             >
           </li>
           <li><a href="patient-doctors.html">Doctors</a></li>
-          <li><a href="patient-profile-settings.html">My Profile</a></li>
-          <li><button type="button" id="logoutBtn">Log out</button></li>
-        </ul>
-      </div>
+                <li><a href="patient-profile-settings.html">My Profile</a></li>
+                <li><button type="button" id="logoutBtn">Log out</button></li>
+            </ul>
+        </div>
     </header>
 
     <main class="page">
-      <div class="page-head">
-        <div>
-          <h1>My appointments</h1>
-          <p>Track your requests and see your visit history.</p>
-        </div>
-        <a href="patient-request-appointment.html" class="btn btn-solid"
-          >Request an appointment</a
+        <div class="page-head">
+            <div>
+                <h1>My appointments</h1>
+                <p>Track your requests and see your visit history.</p>
+            </div>
+            <a href="patient-request-appointment.html" class="btn btn-solid">Request an appointment</a
         >
       </div>
 
@@ -188,7 +179,7 @@
               id="modalReasonLabel"
               style="color: var(--muted, #64748b)"
               hidden
-              >Reason</span
+              >Remarks</span
             >
             <span
               id="modalApptReason"

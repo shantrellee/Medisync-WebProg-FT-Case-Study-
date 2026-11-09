@@ -12,11 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. SIDEBAR: show who is signed in + LOGOUT LOGIC
     if (isProtected) {
-        // Uses the staff's name if the backend sends one, otherwise their staff ID (e.g. "Staff001")
-        const staffLabel = staffData.name ||
-            [staffData.firstName, staffData.lastName].filter(Boolean).join(' ') ||
-            staffData.staffId ||
-            'staff';
+        const staffLabel = staffData.staffId || staffData.name || 'Staff';
         const signedInEl = document.querySelector('.side-foot p');
         if (signedInEl) signedInEl.textContent = `Signed in as ${staffLabel}`;
 
@@ -187,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             document.getElementById('smId').textContent = String(a._id || '').slice(-8).toUpperCase();
             document.getElementById('smPatient').textContent = patientName;
-            document.getElementById('smContact').textContent = a.patientId?.phone || 'N/A';
+            document.getElementById('smContact').textContent = (a.patientId && a.patientId.phone) ? a.patientId.phone : 'N/A';
             document.getElementById('smDoctor').textContent = a.doctor;
             document.getElementById('smService').textContent = a.service;
             document.getElementById('smDate').textContent = `${a.date} at ${a.time}`;
@@ -195,12 +191,18 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('smNotes').textContent = a.notes ? `"${a.notes}"` : 'None provided';
 
             // Details that depend on the status
-            const isClosedWithReason = a.status === 'Rejected' || a.status === 'Cancelled';
-            const savedReason = a.reason || (a.status === 'Rejected' ? 'No reason provided' : '');
-            document.getElementById('smReasonLabel').hidden = !(isClosedWithReason && savedReason);
+            const isClosedWithReason = a.status === 'Cancelled';
+            const savedRemarks = a.remarks || 'No remarks provided';
+
+            document.getElementById('smReasonLabel').hidden = !(isClosedWithReason && savedRemarks);
             const reasonText = document.getElementById('smReason');
-            reasonText.hidden = !(isClosedWithReason && savedReason);
-            reasonText.textContent = savedReason;
+            reasonText.hidden = !(isClosedWithReason && savedRemarks);
+            reasonText.textContent = savedRemarks;
+
+            if (a.status === 'Done' && a.completedAt) {
+                const finishedTime = new Date(a.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('smStatus').innerHTML += ` <small style="color: var(--muted); margin-left: 8px;">(Finished at ${finishedTime})</small>`;
+            }
 
             // Reason box is only for statuses staff can still act on
             const canAct = a.status === 'Pending' || a.status === 'Confirmed';
@@ -210,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (a.status === 'Pending') {
                 buttons = `
                     <button type="button" class="btn btn-solid btn-sm status-btn" data-status="Confirmed">Confirm</button>
-                    <button type="button" class="btn btn-danger btn-sm status-btn" data-status="Rejected">Reject</button>`;
+                    <button type="button" class="btn btn-danger btn-sm status-btn" data-status="Cancelled">Cancel request</button>`;
             } else if (a.status === 'Confirmed') {
                 buttons = `
                     <button type="button" class="btn btn-solid btn-sm status-btn" data-status="Done">Mark as done</button>
@@ -242,10 +244,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!btn) return;
 
             const status = btn.dataset.status;
-            const reason = reasonInput.value.trim();
+            const remarksText = reasonInput.value.trim();
+
+            if (status === 'Done') {
+                const appt = allAppointments.find(x => x._id === openApptId);
+                // Combine date and time (e.g., "2026-11-09T14:00")
+                const apptDateTime = new Date(`${appt.date}T${appt.time}`);
+                const now = new Date();
+
+                if (apptDateTime > now) {
+                    errorBox.textContent = 'You cannot mark an appointment as Done before its scheduled time.';
+                    errorBox.hidden = false;
+                    return; // Stop the function completely
+                }
+            }
 
             // Rejecting or cancelling needs a reason so the patient knows why
-            if ((status === 'Rejected' || status === 'Cancelled') && !reason) {
+            if ((status === 'Rejected' || status === 'Cancelled') && !remarksText) {
                 errorBox.textContent = `Please enter a reason before you ${status === 'Rejected' ? 'reject this request' : 'cancel this appointment'}.`;
                 errorBox.hidden = false;
                 reasonInput.focus();
@@ -254,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             btn.disabled = true;
             try {
-                const body = reason ? { status, reason } : { status };
+                const body = remarksText ? { status, remarks: remarksText } : { status };
                 await apiRequest(`/appointments/${openApptId}/status`, { method: 'PATCH', body: JSON.stringify(body) });
                 modal.hidden = true;
                 showMessage('staffMessage', `Appointment marked as ${status}.`, true);
@@ -409,115 +424,121 @@ document.addEventListener('DOMContentLoaded', () => {
         loadPatients();
     }
 
-   // ADD / EDIT PATIENT FORM (staff-patient-form.html)
-(async () => {
-    const patientForm = document.getElementById('patientForm');
+    // ADD / EDIT PATIENT FORM (staff-patient-form.html)
+    // Restrict birthdate inputs to today or past dates
+    const birthDateInputs = document.querySelectorAll('input[name="birthDate"], #birthDate');
+    if (birthDateInputs.length > 0) {
+        const today = new Date().toLocaleDateString('en-CA');
+        birthDateInputs.forEach(input => input.setAttribute('max', today));
+    }
+    (async() => {
+        const patientForm = document.getElementById('patientForm');
 
-    if (patientForm) {
-        const editId = new URLSearchParams(window.location.search).get('id');
-        const submitBtn = document.getElementById('patientSubmit');
+        if (patientForm) {
+            const editId = new URLSearchParams(window.location.search).get('id');
+            const submitBtn = document.getElementById('patientSubmit');
 
-        // EDIT MODE
-        if (editId) {
-            document.title = 'Edit patient | Medisync Staff';
-            document.getElementById('formTitle').textContent = 'Edit patient';
-            submitBtn.textContent = 'Save changes';
+            // EDIT MODE
+            if (editId) {
+                document.title = 'Edit patient | Medisync Staff';
+                document.getElementById('formTitle').textContent = 'Edit patient';
+                submitBtn.textContent = 'Save changes';
 
-            // Disable button while loading patient details
-            submitBtn.disabled = true;
+                // Disable button while loading patient details
+                submitBtn.disabled = true;
 
-            try {
-                // Retrieve existing patients
-                const list = await apiRequest('/patients');
+                try {
+                    // Retrieve existing patients
+                    const list = await apiRequest('/patients');
 
-                // Find selected patient
-                const p = list.find(x =>
-                    x._id === editId || x.id === editId
-                );
+                    // Find selected patient
+                    const p = list.find(x =>
+                        x._id === editId || x.id === editId
+                    );
 
-                if (!p) {
-                    showMessage('staffMessage', 'Patient not found.');
+                    if (!p) {
+                        showMessage('staffMessage', 'Patient not found.');
+                        return;
+                    }
+
+                    // Pre-fill form with existing details
+                    patientForm.firstName.value = p.firstName || '';
+                    patientForm.lastName.value = p.lastName || '';
+
+                    patientForm.birthDate.value = p.birthDate ?
+                        new Date(p.birthDate).toISOString().split('T')[0] :
+                        '';
+
+                    patientForm.sex.value = p.sex || '';
+                    patientForm.contact.value = p.phone || '';
+                    patientForm.email.value = p.email || '';
+                    patientForm.address.value = p.address || '';
+
+                } catch (err) {
+                    showMessage('staffMessage', err.message);
                     return;
                 }
 
-                // Pre-fill form with existing details
-                patientForm.firstName.value = p.firstName || '';
-                patientForm.lastName.value = p.lastName || '';
-
-                patientForm.birthDate.value = p.birthDate
-                    ? new Date(p.birthDate).toISOString().split('T')[0]
-                    : '';
-
-                patientForm.sex.value = p.sex || '';
-                patientForm.contact.value = p.phone || '';
-                patientForm.email.value = p.email || '';
-                patientForm.address.value = p.address || '';
-
-            } catch (err) {
-                showMessage('staffMessage', err.message);
-                return;
-            }
-
-            // Enable button after loading
-            submitBtn.disabled = false;
-        }
-
-        // FORM SUBMISSION
-        patientForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            submitBtn.disabled = true;
-
-            try {
-                const payload = {
-                    firstName: patientForm.firstName.value.trim(),
-                    lastName: patientForm.lastName.value.trim(),
-                    birthDate: patientForm.birthDate.value,
-                    sex: patientForm.sex.value,
-                    phone: patientForm.contact.value.trim(),
-                    address: patientForm.address.value.trim(),
-                    email: patientForm.email.value.trim()
-                };
-
-                if (editId) {
-                    // UPDATE EXISTING PATIENT
-                    await apiRequest(`/patients/${editId}`, {
-                        method: 'PUT',
-                        body: JSON.stringify(payload)
-                    });
-
-                    showMessage(
-                        'staffMessage',
-                        'Patient updated successfully!',
-                        true
-                    );
-
-                } else {
-                    // ADD NEW PATIENT
-                    await apiRequest('/patients', {
-                        method: 'POST',
-                        body: JSON.stringify(payload)
-                    });
-
-                    showMessage(
-                        'staffMessage',
-                        'Patient added successfully!',
-                        true
-                    );
-                }
-
-                // Return to patient list
-                setTimeout(() => {
-                    window.location.href = 'staff-patients.html';
-                }, 1500);
-
-            } catch (err) {
-                showMessage('staffMessage', err.message);
+                // Enable button after loading
                 submitBtn.disabled = false;
             }
-        });
-    }
-})();
+
+            // FORM SUBMISSION
+            patientForm.addEventListener('submit', async(e) => {
+                e.preventDefault();
+
+                submitBtn.disabled = true;
+
+                try {
+                    const payload = {
+                        firstName: patientForm.firstName.value.trim(),
+                        lastName: patientForm.lastName.value.trim(),
+                        birthDate: patientForm.birthDate.value,
+                        sex: patientForm.sex.value,
+                        phone: patientForm.contact.value.replace(/[\s-]/g, ''),
+                        address: patientForm.address.value.trim(),
+                        email: patientForm.email.value.trim()
+                    };
+
+                    if (editId) {
+                        // UPDATE EXISTING PATIENT
+                        await apiRequest(`/patients/${editId}`, {
+                            method: 'PUT',
+                            body: JSON.stringify(payload)
+                        });
+
+                        showMessage(
+                            'staffMessage',
+                            'Patient updated successfully!',
+                            true
+                        );
+
+                    } else {
+                        // ADD NEW PATIENT
+                        await apiRequest('/patients', {
+                            method: 'POST',
+                            body: JSON.stringify(payload)
+                        });
+
+                        showMessage(
+                            'staffMessage',
+                            'Patient added successfully!',
+                            true
+                        );
+                    }
+
+                    // Return to patient list
+                    setTimeout(() => {
+                        window.location.href = 'staff-patients.html';
+                    }, 1500);
+
+                } catch (err) {
+                    showMessage('staffMessage', err.message);
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+    })();
 
 
 

@@ -53,7 +53,11 @@ const patientSchema = new mongoose.Schema({
     password: { type: String }, // Optional for walk-ins
     birthDate: { type: String, required: true },
     sex: { type: String, enum: ['Male', 'Female'], required: true },
-    phone: { type: String, required: true, match: /^(09|\+639)\d{9}$/ },
+    phone: {
+        type: String,
+        required: true,
+        match: [/^09\d{9}$/, 'Phone number must be exactly 11 digits starting with 09 (e.g., 09123456789)']
+    },
     address: { type: String, trim: true, default: '' }
 }, { timestamps: true });
 
@@ -73,20 +77,20 @@ const appointmentSchema = new mongoose.Schema({
     patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Patient', required: true },
     doctor: { type: String, required: true },
     service: { type: String, required: true },
-    date: { type: String, required: true }, // Format: YYYY-MM-DD
-    time: { type: String, required: true }, // Format: HH:MM
+    date: { type: String, required: true },
+    time: { type: String, required: true },
     notes: { type: String, trim: true, maxlength: 300, default: '' },
+    remarks: { type: String, trim: true, default: '' }, // Distinct field for staff cancellation reason
+    completedAt: { type: Date },
     status: {
         type: String,
-        enum: ['Pending', 'Confirmed', 'Done', 'Cancelled'],
+        enum: ['Pending', 'Confirmed', 'Done', 'Cancelled'], // Stripped out 'Rejected'
         default: 'Pending'
     }
 }, { timestamps: true });
 
 appointmentSchema.index({ patientId: 1, date: 1 });
-// Partial unique index: Allows same doctor/date/time if the previous appt was cancelled
 appointmentSchema.index({ doctor: 1, date: 1, time: 1 }, { unique: true, partialFilterExpression: { status: { $ne: 'Cancelled' } } });
-
 const Appointment = mongoose.model('Appointment', appointmentSchema);
 
 const catalogSchema = new mongoose.Schema({
@@ -246,6 +250,7 @@ app.patch('/api/appointments/:id/cancel-self', requireAuth, requireRole('patient
         }
 
         appt.status = 'Cancelled';
+        appt.remarks = 'Cancelled by Patient';
         await appt.save();
         res.json(appt);
     } catch (error) { next(error); }
@@ -265,8 +270,8 @@ app.get('/api/appointments', requireAuth, requireRole('staff'), async(req, res, 
 
 app.patch('/api/appointments/:id/status', requireAuth, requireRole('staff'), async(req, res, next) => {
     try {
-        const { status } = req.body;
-        const allowed = ['Pending', 'Confirmed', 'Done', 'Cancelled'];
+        const { status, remarks } = req.body;
+        const allowed = ['Pending', 'Confirmed', 'Done', 'Cancelled']; // Stripped out 'Rejected'
         if (!allowed.includes(status)) return res.status(400).json({ error: 'Invalid status provided' });
 
         const appt = await Appointment.findById(req.params.id);
@@ -279,7 +284,17 @@ app.patch('/api/appointments/:id/status', requireAuth, requireRole('staff'), asy
             return res.status(400).json({ error: 'Appointments must be confirmed before marking as done' });
         }
 
+        if (status === 'Done') {
+            const apptDateTime = new Date(`${appt.date}T${appt.time}`);
+            if (apptDateTime > new Date()) {
+                return res.status(400).json({ error: 'Cannot mark appointment as done before its scheduled time' });
+            }
+            appt.completedAt = new Date();
+        }
+
         appt.status = status;
+        if (remarks !== undefined) appt.remarks = remarks;
+
         await appt.save();
         res.json(appt);
     } catch (error) { next(error); }
@@ -318,111 +333,109 @@ app.post('/api/patients', requireAuth, requireRole('staff'), async(req, res, nex
 });
 
 
-app.delete('/api/patients/:id', requireAuth, async (req, res) => {
-  try {
-    const { id } = req.params;
+app.delete('/api/patients/:id', requireAuth, async(req, res) => {
+    try {
+        const { id } = req.params;
 
-    // Remove the patient
-    const deletedPatient = await Patient.findByIdAndDelete(id);
+        // Remove the patient
+        const deletedPatient = await Patient.findByIdAndDelete(id);
 
-    if (!deletedPatient) {
-      return res.status(404).json({
-        error: 'Patient not found or already deleted.'
-      });
+        if (!deletedPatient) {
+            return res.status(404).json({
+                error: 'Patient not found or already deleted.'
+            });
+        }
+
+        // Remove all appointments associated with this patient
+        await Appointment.deleteMany({ patientId: id });
+
+        res.json({
+            message: "Patient ${deletedPatient.firstName} ${deletedPatient.lastName} and associated appointments were deleted successfully.",
+            patientId: id
+        });
+
+    } catch (error) {
+        console.error('Delete patient error:', error);
+
+        res.status(500).json({
+            error: 'Server error while deleting patient record.'
+        });
     }
-
-    // Remove all appointments associated with this patient
-    await Appointment.deleteMany({ patientId: id });
-
-    res.json({
-      message: "Patient ${deletedPatient.firstName} ${deletedPatient.lastName} and associated appointments were deleted successfully.",
-      patientId: id
-    });
-
-  } catch (error) {
-    console.error('Delete patient error:', error);
-
-    res.status(500).json({
-      error: 'Server error while deleting patient record.'
-    });
-  }
 });
 
-app.put('/api/patients/:id', requireAuth, async (req, res) => {
-  try {
-    const { id } = req.params;
+app.put('/api/patients/:id', requireAuth, async(req, res) => {
+    try {
+        const { id } = req.params;
 
-    // Only allow these patient fields to be updated
-    const allowedFields = [
-      'firstName',
-      'lastName',
-      'email',
-      'birthDate',
-      'sex',
-      'phone',
-      'address'
-    ];
+        // Only allow these patient fields to be updated
+        const allowedFields = [
+            'firstName',
+            'lastName',
+            'email',
+            'birthDate',
+            'sex',
+            'phone',
+            'address'
+        ];
 
-    const updates = {};
+        const updates = {};
 
-    allowedFields.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        updates[field] = req.body[field];
-      }
-    });
+        allowedFields.forEach((field) => {
+            if (req.body[field] !== undefined) {
+                updates[field] = req.body[field];
+            }
+        });
 
-    if (Object.keys(updates).length === 0) {
-      return res.status(400).json({
-        error: 'No valid fields provided for update.'
-      });
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({
+                error: 'No valid fields provided for update.'
+            });
+        }
+
+        // Update the patient
+        const updatedPatient = await Patient.findByIdAndUpdate(
+            id, { $set: updates }, {
+                new: true,
+                runValidators: true
+            }
+        );
+
+        if (!updatedPatient) {
+            return res.status(404).json({
+                error: 'Patient not found.'
+            });
+        }
+
+        res.json({
+            message: 'Patient updated successfully.',
+            patient: updatedPatient
+        });
+
+    } catch (error) {
+        console.error('Update patient error:', error);
+
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({
+                error: error.message
+            });
+        }
+
+        if (error.name === 'CastError') {
+            return res.status(400).json({
+                error: 'Invalid patient ID.'
+            });
+        }
+
+        if (error.code === 11000) {
+            return res.status(409).json({
+                error: 'Email is already being used by another patient.'
+            });
+        }
+
+        res.status(500).json({
+            error: 'Server error while updating patient record.'
+        });
     }
-
-    // Update the patient
-    const updatedPatient = await Patient.findByIdAndUpdate(
-      id,
-      { $set: updates },
-      {
-        new: true,
-        runValidators: true
-      }
-    );
-
-    if (!updatedPatient) {
-      return res.status(404).json({
-        error: 'Patient not found.'
-      });
-    }
-
-    res.json({
-      message: 'Patient updated successfully.',
-      patient: updatedPatient
-    });
-
-  } catch (error) {
-    console.error('Update patient error:', error);
-
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({
-        error: error.message
-      });
-    }
-
-    if (error.name === 'CastError') {
-      return res.status(400).json({
-        error: 'Invalid patient ID.'
-      });
-    }
-
-    if (error.code === 11000) {
-      return res.status(409).json({
-        error: 'Email is already being used by another patient.'
-      });
-    }
-
-    res.status(500).json({
-      error: 'Server error while updating patient record.'
-    });
-  }
 });
 
 // --- ERROR HANDLING ---
@@ -430,7 +443,26 @@ app.put('/api/patients/:id', requireAuth, async (req, res) => {
 app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
 
 app.use((err, req, res, next) => {
-    console.error(err);
+    console.error("Backend Error:", err);
+
+    // Catch Mongoose Validation Errors and send them to the frontend
+    if (err.name === 'ValidationError') {
+        const messages = Object.values(err.errors).map(val => val.message);
+        return res.status(400).json({ error: messages.join(' | ') });
+    }
+
+    // Catch Mongoose Duplicate Key Errors (E11000)
+    if (err.code === 11000) {
+        // If it's a duplicate email during registration
+        if (err.keyPattern && err.keyPattern.email) {
+            return res.status(409).json({ error: 'This email is already registered.' });
+        }
+        // If it's a duplicate appointment slot
+        if (err.keyPattern && err.keyPattern.doctor && err.keyPattern.date && err.keyPattern.time) {
+            return res.status(409).json({ error: 'This time slot is already booked for this doctor. Please select a different time.' });
+        }
+    }
+
     res.status(err.status || 500).json({
         error: process.env.NODE_ENV === 'production' ? 'Server error' : err.message
     });
