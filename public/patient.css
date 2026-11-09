@@ -550,7 +550,7 @@ dialog::backdrop {
 }
 
 
-/* The actual white popup box */
+/* popup box */
 
 .modal-content {
     background-color: #ffffff;
@@ -778,4 +778,75 @@ a.chip:hover {
 
 .modal-content .page-message {
     margin-bottom: 16px;
+}
+
+/* ---------- //Home: patient guidelines ---------- */
+
+.guidelines {
+    background: #EEF8F0;
+    border-top: 1px solid var(--border);
+}
+
+.guidelines-head {
+    text-align: center;
+}
+
+.guidelines-head .eyebrow {
+    display: inline-block;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--primary);
+}
+
+.guideline-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.guideline-grid li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 28px 22px;
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+}
+
+.guideline-icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 4px;
+    border-radius: 50%;
+    background: var(--secondary);
+    color: var(--primary);
+}
+
+.guideline-grid h3 {
+    font-size: 1.05rem;
+}
+
+.guideline-grid p {
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+@media (max-width: 900px) {
+    .guideline-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .guideline-grid {
+        grid-template-columns: 1fr;
+    }
 }
