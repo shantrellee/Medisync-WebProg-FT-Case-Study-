@@ -697,3 +697,35 @@ ol {
     color: var(--done-text);
     border-color: #A7F3D0;
 }
+
+.pw-wrap {
+    position: relative;
+    width: 100%;
+}
+ 
+/* room on the right so typed text doesn't run under the eye
+   (the .panel versions are for the profile page, where patient.css styles inputs too) */
+.pw-wrap input[type="password"],
+.pw-wrap input[type="text"],
+.panel .pw-wrap input[type="password"],
+.panel .pw-wrap input[type="text"] {
+    padding-right: 44px;
+}
+ 
+.pw-toggle {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    padding: 6px;
+    background: none;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+ 
+.pw-toggle:hover {
+    background: var(--secondary);
+}

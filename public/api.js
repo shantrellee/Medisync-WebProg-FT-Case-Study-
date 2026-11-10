@@ -96,3 +96,19 @@ function getDoctorInfo(item) {
         education: item.education || ''
     };
 }
+
+// Show / hide password buttons (any button with class "pw-toggle" next to a password input)
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.pw-toggle').forEach(btn => {
+        const input = btn.parentElement.querySelector('input');
+        const icon = btn.querySelector('img');
+        if (!input || !icon) return;
+        btn.addEventListener('click', () => {
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            icon.src = show ? 'icons/eye-off.svg' : 'icons/eye.svg';
+            btn.setAttribute('aria-pressed', String(show));
+            btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        });
+    });
+});
